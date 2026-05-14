@@ -1,0 +1,2413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ULAKU | Sistema de Pedidos</title>
+<link rel="icon" href="icono-ulaku.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#c8521a">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap');
+
+:root{
+  --primary:#c8521a;
+  --green:#2d6a4f;
+  --blue:#3a6ea5;
+  --purple:#6b46c1;
+  --gold:#b8860b;
+  --bg:#f5f1eb;
+  --card:#fff;
+  --border:#e0d9cf;
+  --soft:#faf8f4;
+  --text:#1a1a1a;
+  --muted:#7a7570;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding:16px;
+  font-size:14px;
+  max-width:760px;
+  margin:0 auto;
+}
+
+.brand-header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.brand-logo{
+  width:48px; height:48px;
+  object-fit:contain;
+  border-radius:12px;
+  background:#fff;
+  border:1px solid var(--border);
+  padding:5px;
+}
+
+h1{
+  font-family:'DM Serif Display',serif;
+  font-size:28px;
+  margin-bottom:2px;
+  color:var(--primary);
+  line-height:1;
+}
+
+.subtitle{ color:var(--muted); font-size:13px; }
+
+/* ── NAV TABS ─────────────────────────────── */
+.nav-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  background:var(--soft);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:4px;
+  gap:4px;
+  margin-bottom:12px;
+}
+
+.nav-tab{
+  padding:10px;
+  border:none;
+  border-radius:9px;
+  font-family:'DM Sans',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  background:transparent;
+  color:var(--muted);
+  transition:all .2s;
+}
+
+.nav-tab.active{
+  background:var(--primary);
+  color:#fff;
+  box-shadow:0 2px 8px rgba(200,82,26,.25);
+}
+
+.nav-tab.active.tab-cartera{
+  background:var(--gold);
+  box-shadow:0 2px 8px rgba(184,134,11,.25);
+}
+
+/* ── MODE TOGGLE ─────────────────────────── */
+.mode-toggle{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  background:var(--soft);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:4px;
+  gap:4px;
+  margin-bottom:12px;
+}
+
+.mode-btn{
+  padding:10px;
+  border:none;
+  border-radius:9px;
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  background:transparent;
+  color:var(--muted);
+  transition:all .2s;
+}
+
+.mode-btn.active{
+  background:var(--primary);
+  color:#fff;
+  box-shadow:0 2px 8px rgba(200,82,26,.25);
+}
+
+.mode-btn.active.sub-mode{
+  background:var(--purple);
+  box-shadow:0 2px 8px rgba(107,70,193,.25);
+}
+
+/* ── BADGE ───────────────────────────────── */
+.sub-badge{
+  display:inline-block;
+  background:var(--purple);
+  color:#fff;
+  font-size:10px;
+  font-weight:700;
+  padding:2px 7px;
+  border-radius:20px;
+  letter-spacing:.05em;
+  vertical-align:middle;
+  margin-left:6px;
+}
+
+/* ── CARD ────────────────────────────────── */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:16px;
+  margin-bottom:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  transition:border-color .2s;
+}
+
+.card.sub-active{
+  border-color:var(--purple);
+  box-shadow:0 2px 12px rgba(107,70,193,.12);
+}
+
+label{
+  display:block;
+  font-size:11px;
+  font-weight:600;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  margin-bottom:4px;
+}
+
+select,
+input[type=text],
+input[type=date],
+input[type=number]{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:12px;
+  font-family:'DM Sans',sans-serif;
+  font-size:16px;
+  background:var(--soft);
+  color:var(--text);
+  outline:none;
+}
+
+select:focus, input:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(200,82,26,.12);
+}
+
+.sub-mode-active select:focus,
+.sub-mode-active input:focus{
+  border-color:var(--purple);
+  box-shadow:0 0 0 3px rgba(107,70,193,.12);
+}
+
+.fecha-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+/* ── RECURRENCIA ─────────────────────────── */
+#seccion-recurrencia{
+  display:none;
+  margin-top:10px;
+  padding-top:12px;
+  border-top:1px dashed var(--border);
+}
+
+#seccion-recurrencia.show{ display:block }
+
+.recurrencia-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.recurrencia-preview{
+  margin-top:10px;
+  background:#f3f0f9;
+  border:1px solid #d6c9f0;
+  border-radius:8px;
+  padding:10px 12px;
+  font-size:12px;
+  color:var(--purple);
+  line-height:1.7;
+  display:none;
+}
+
+.recurrencia-preview.show{ display:block }
+
+/* ── PRODUCTOS ───────────────────────────── */
+.prod-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--soft);
+  margin-bottom:8px;
+}
+
+.prod-row.activo{ border-color:var(--primary); background:#fdf0e8; }
+.prod-row.activo.sub-activo{ border-color:var(--purple); background:#f5f0fd; }
+
+.prod-nombre{ flex:1; font-weight:600; font-size:14px; }
+
+.prod-precio{
+  color:var(--muted);
+  font-size:12px;
+  min-width:78px;
+  text-align:right;
+}
+
+.prod-qty{ display:flex; align-items:center; gap:7px; }
+
+.qty-btn{
+  width:38px; height:38px;
+  border:1px solid var(--border);
+  border-radius:50%;
+  background:#fff;
+  cursor:pointer;
+  font-size:22px;
+  display:flex; align-items:center; justify-content:center;
+}
+
+.qty-btn:hover{ background:var(--primary); border-color:var(--primary); color:#fff; }
+.sub-mode-active .qty-btn:hover{ background:var(--purple); border-color:var(--purple); }
+
+.qty-num{ min-width:24px; text-align:center; font-weight:700; font-size:16px; }
+
+.divider{ height:1px; background:var(--border); margin:10px 0; }
+
+.resumen-row{ display:flex; justify-content:space-between; font-size:14px; padding:4px 0; gap:12px; }
+
+.resumen-row.total{
+  font-weight:700; font-size:18px; color:var(--primary);
+  padding-top:8px; border-top:2px solid var(--primary);
+}
+
+.resumen-row.total.sub-total{ color:var(--purple); border-top-color:var(--purple); }
+
+.resumen-prod{ color:var(--muted); }
+
+/* ── BOTONES ─────────────────────────────── */
+.btns{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+  margin-top:4px;
+}
+
+.btns.sub-btns{ grid-template-columns:1fr 1fr; }
+
+.btn{
+  padding:15px;
+  border:none;
+  border-radius:10px;
+  font-family:'DM Sans',sans-serif;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+  color:#fff;
+}
+
+.btn:disabled{ opacity:.35; cursor:not-allowed; }
+
+.btn-primary  { background:var(--primary); }
+.btn-secondary{ background:var(--green);   }
+.btn-calendar { background:var(--blue);    }
+.btn-sub      { background:var(--purple);  }
+.btn-sub-wa   { background:var(--green);   }
+.btn-gold     { background:var(--gold);    }
+.btn-danger   { background:#c0392b;        }
+
+/* ── ALERTAS ─────────────────────────────── */
+.alert{
+  border-radius:8px;
+  padding:10px 12px;
+  font-size:12px;
+  margin-bottom:12px;
+  display:none;
+}
+
+.alert.show{ display:block }
+.alert-warn{ background:#fdecea; border:1px solid #f5c6c2; color:#c0392b; }
+.alert-ok  { background:#e9f5ef; border:1px solid #b7dfc9; color:var(--green); }
+.alert-sub { background:#f3f0f9; border:1px solid #d6c9f0; color:var(--purple); }
+
+.pedido-preview{
+  background:#1e1e1e; color:#e8e4de;
+  border-radius:8px; padding:14px;
+  font-size:12px; line-height:1.8;
+  font-family:monospace; margin-top:10px;
+  white-space:pre-wrap; display:none;
+}
+
+.pedido-preview.show{ display:block }
+
+.copy-btn{
+  background:transparent; border:1px solid #555;
+  color:#888; border-radius:6px;
+  padding:6px 12px; font-size:12px;
+  cursor:pointer; margin-top:8px;
+  font-family:'DM Sans',sans-serif; display:none;
+}
+
+.section-title{ font-size:14px; font-weight:700; margin-bottom:10px; }
+
+.spinner{
+  display:inline-block; width:13px; height:13px;
+  border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff; border-radius:50%;
+  animation:spin .7s linear infinite;
+  vertical-align:middle; margin-right:4px;
+}
+
+@keyframes spin{ to{ transform:rotate(360deg) } }
+
+.info-cli{
+  margin-top:8px; font-size:12px; color:var(--muted);
+  display:none; line-height:1.8;
+  background:var(--soft); padding:8px 10px;
+  border-radius:6px; border:1px solid var(--border);
+}
+
+.wa-nota{
+  font-size:11px; color:var(--muted);
+  margin-top:8px; line-height:1.5; display:none;
+}
+
+/* ── CARTERA ─────────────────────────────── */
+#tab-cartera-view{ display:none; }
+
+.cartera-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.cartera-total{
+  background:linear-gradient(135deg,#b8860b,#d4a017);
+  color:#fff;
+  border-radius:12px;
+  padding:16px;
+  margin-bottom:12px;
+  text-align:center;
+}
+
+.cartera-total .ct-label{
+  font-size:11px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  opacity:.85;
+  margin-bottom:4px;
+}
+
+.cartera-total .ct-monto{
+  font-family:'DM Serif Display',serif;
+  font-size:32px;
+  line-height:1;
+}
+
+.cartera-total .ct-clientes{
+  font-size:12px;
+  opacity:.8;
+  margin-top:4px;
+}
+
+.cli-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px;
+  margin-bottom:8px;
+  cursor:pointer;
+  transition:border-color .2s, box-shadow .2s;
+}
+
+.cli-card:hover{
+  border-color:var(--gold);
+  box-shadow:0 2px 12px rgba(184,134,11,.15);
+}
+
+.cli-card-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+
+.cli-card-nombre{
+  font-weight:700;
+  font-size:15px;
+  flex:1;
+}
+
+.cli-card-saldo{
+  font-weight:700;
+  font-size:16px;
+  color:#c0392b;
+  white-space:nowrap;
+}
+
+.cli-card-meta{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.cli-card-bar-bg{
+  height:4px;
+  background:var(--border);
+  border-radius:4px;
+  margin-top:8px;
+  overflow:hidden;
+}
+
+.cli-card-bar{
+  height:100%;
+  background:linear-gradient(90deg,#e67e22,#c0392b);
+  border-radius:4px;
+  transition:width .4s ease;
+}
+
+/* ── ESTADO DE CUENTA ────────────────────── */
+#estado-cuenta-view{ display:none; }
+
+.ec-header{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.btn-back{
+  background:var(--soft);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:8px 12px;
+  font-family:'DM Sans',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  color:var(--text);
+}
+
+.ec-resumen{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.ec-kpi{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px;
+  text-align:center;
+}
+
+.ec-kpi-label{
+  font-size:10px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--muted);
+  margin-bottom:4px;
+}
+
+.ec-kpi-valor{
+  font-weight:700;
+  font-size:16px;
+}
+
+.ec-kpi-valor.rojo{ color:#c0392b; }
+.ec-kpi-valor.verde{ color:var(--green); }
+
+.ped-item{
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:12px;
+  margin-bottom:8px;
+  background:var(--soft);
+}
+
+.ped-item.saldado{
+  border-color:#b7dfc9;
+  background:#f0faf4;
+  opacity:.7;
+}
+
+.ped-item-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:8px;
+}
+
+.ped-item-id{
+  font-size:11px;
+  font-weight:700;
+  color:var(--muted);
+}
+
+.ped-item-fecha{
+  font-size:11px;
+  color:var(--muted);
+}
+
+.ped-item-saldo{
+  font-weight:700;
+  font-size:15px;
+  white-space:nowrap;
+}
+
+.ped-item-saldo.pendiente{ color:#c0392b; }
+.ped-item-saldo.saldado{ color:var(--green); }
+
+.ped-item-barra{
+  margin:8px 0 6px;
+  height:6px;
+  background:var(--border);
+  border-radius:6px;
+  overflow:hidden;
+}
+
+.ped-item-barra-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--green),#52be80);
+  border-radius:6px;
+}
+
+.ped-item-meta{
+  font-size:11px;
+  color:var(--muted);
+  line-height:1.7;
+}
+
+.ped-pagos-list{
+  margin-top:6px;
+  padding-top:6px;
+  border-top:1px dashed var(--border);
+}
+
+.ped-pago-row{
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+  color:var(--green);
+  padding:2px 0;
+}
+
+/* ── FORMULARIO PAGO ─────────────────────── */
+.pago-form{
+  background:var(--soft);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px;
+  margin-top:12px;
+}
+
+.pago-form-title{
+  font-size:13px;
+  font-weight:700;
+  margin-bottom:10px;
+  color:var(--gold);
+}
+
+.pago-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+/* ── MODAL RECIBO ────────────────────────── */
+.modal-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  z-index:1000;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+}
+
+.modal-overlay.show{
+  display:flex;
+}
+
+.modal{
+  background:#fff;
+  border-radius:14px;
+  padding:24px;
+  max-width:400px;
+  width:100%;
+  max-height:90vh;
+  overflow-y:auto;
+}
+
+/* ── RECIBO IMPRIMIBLE ───────────────────── */
+.recibo{
+  font-family:'DM Sans',sans-serif;
+  color:#1a1a1a;
+}
+
+.recibo-header{
+  text-align:center;
+  padding-bottom:12px;
+  border-bottom:2px solid #c8521a;
+  margin-bottom:14px;
+}
+
+.recibo-marca{
+  font-family:'DM Serif Display',serif;
+  font-size:22px;
+  color:#c8521a;
+  margin-bottom:2px;
+}
+
+.recibo-sub{
+  font-size:11px;
+  color:#7a7570;
+}
+
+.recibo-id{
+  text-align:center;
+  font-size:11px;
+  color:#7a7570;
+  margin-bottom:14px;
+}
+
+.recibo-section{
+  margin-bottom:12px;
+}
+
+.recibo-section-title{
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  color:#7a7570;
+  margin-bottom:6px;
+  border-bottom:1px solid #e0d9cf;
+  padding-bottom:3px;
+}
+
+.recibo-row{
+  display:flex;
+  justify-content:space-between;
+  font-size:13px;
+  padding:3px 0;
+}
+
+.recibo-row.bold{ font-weight:700; }
+
+.recibo-total{
+  background:#fdf0e8;
+  border:2px solid #c8521a;
+  border-radius:8px;
+  padding:10px 12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:12px 0;
+}
+
+.recibo-total-label{
+  font-size:12px;
+  font-weight:700;
+  color:#c8521a;
+}
+
+.recibo-total-monto{
+  font-family:'DM Serif Display',serif;
+  font-size:22px;
+  color:#c8521a;
+}
+
+.recibo-saldo{
+  background:#fdecea;
+  border:1px solid #f5c6c2;
+  border-radius:8px;
+  padding:8px 12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.recibo-saldo.saldado{
+  background:#e9f5ef;
+  border-color:#b7dfc9;
+}
+
+.recibo-saldo-label{ font-size:12px; font-weight:600; color:#7a7570; }
+.recibo-saldo-monto{ font-weight:700; font-size:15px; color:#c0392b; }
+.recibo-saldo.saldado .recibo-saldo-monto{ color:var(--green); }
+
+.recibo-aplicaciones{
+  font-size:11px;
+  color:#7a7570;
+  line-height:1.8;
+  background:#f9f9f9;
+  border-radius:6px;
+  padding:8px 10px;
+  margin-bottom:10px;
+}
+
+.recibo-footer{
+  text-align:center;
+  font-size:10px;
+  color:#7a7570;
+  padding-top:10px;
+  border-top:1px solid #e0d9cf;
+  line-height:1.8;
+}
+
+.modal-btns{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:14px;
+}
+
+@media(max-width:700px){
+  body{ padding:12px; }
+  .btns{ grid-template-columns:1fr; }
+  .btns.sub-btns{ grid-template-columns:1fr; }
+  .fecha-row{ grid-template-columns:1fr; }
+  .recurrencia-grid{ grid-template-columns:1fr; }
+  .prod-row{ display:grid; grid-template-columns:1fr auto; }
+  .prod-precio{ text-align:left; }
+  .prod-qty{ grid-column:1 / -1; justify-content:space-between; }
+  .qty-btn{ width:44px; height:44px; }
+  .btn{ font-size:16px; padding:16px; }
+  .nav-tabs{ grid-template-columns:1fr; }
+  .ec-resumen{ grid-template-columns:1fr; }
+  .pago-grid{ grid-template-columns:1fr; }
+}
+
+@media print{
+  body *{ visibility:hidden; }
+  .recibo, .recibo *{ visibility:visible; }
+  .recibo{
+    position:fixed;
+    top:0; left:0;
+    width:100%;
+    padding:20px;
+  }
+  .modal-btns{ display:none; }
+}
+
+/* ── SLOTS DE SUSCRIPCIÓN ────────────────────── */
+.slot-card{
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:10px;
+  background:var(--soft);
+  border-left:3px solid var(--purple);
+}
+
+.slot-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+  gap:8px;
+}
+
+.slot-dia-select{
+  flex:1;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:8px 10px;
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;
+  font-weight:600;
+  background:#f3f0f9;
+  color:var(--purple);
+}
+
+.slot-subtotal{
+  font-weight:700;
+  font-size:14px;
+  color:var(--purple);
+  white-space:nowrap;
+}
+
+.slot-remove{
+  background:transparent;
+  border:1px solid #ddd;
+  border-radius:6px;
+  padding:6px 10px;
+  cursor:pointer;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.slot-productos{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.slot-prod-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:8px 10px;
+}
+
+.slot-prod-nombre{ flex:1; font-size:13px; font-weight:600; }
+
+.slot-prod-precio{
+  font-size:11px;
+  color:var(--muted);
+  min-width:70px;
+  text-align:right;
+}
+
+.slot-prod-qty{ display:flex; align-items:center; gap:6px; }
+
+.slot-qty-btn{
+  width:30px; height:30px;
+  border:1px solid var(--border);
+  border-radius:50%;
+  background:#fff;
+  cursor:pointer;
+  font-size:18px;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--purple);
+}
+.slot-qty-btn:hover{ background:var(--purple); color:#fff; border-color:var(--purple); }
+
+.slot-qty-num{ min-width:20px; text-align:center; font-weight:700; font-size:14px; }
+
+/* ── RESUMEN MES ─────────────────────────────── */
+.mes-nav{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+  gap:8px;
+}
+
+.mes-nav-btn{
+  background:var(--soft);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:8px 14px;
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.mes-nav-label{
+  font-family:'DM Serif Display',serif;
+  font-size:18px;
+  color:var(--text);
+  text-align:center;
+  flex:1;
+}
+
+.resumen-mes-kpis{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.seccion-mes{
+  margin-bottom:16px;
+}
+
+.seccion-mes-titulo{
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  color:var(--muted);
+  margin-bottom:8px;
+  padding-bottom:4px;
+  border-bottom:1px solid var(--border);
+}
+
+.entrega-item{
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px 12px;
+  margin-bottom:6px;
+  background:var(--soft);
+  cursor:pointer;
+  transition:border-color .2s;
+}
+
+.entrega-item:hover{ border-color:var(--purple); }
+.entrega-item.sub{ border-left:3px solid var(--purple); }
+.entrega-item.unico{ border-left:3px solid var(--blue); }
+.entrega-item.saldado{ opacity:.6; background:#f0faf4; border-color:#b7dfc9; }
+
+.entrega-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:8px;
+}
+
+.entrega-fecha{
+  font-size:13px;
+  font-weight:700;
+}
+
+.entrega-dia{
+  font-size:11px;
+  color:var(--muted);
+}
+
+.entrega-monto{
+  font-weight:700;
+  font-size:14px;
+  white-space:nowrap;
+}
+
+.entrega-monto.pendiente{ color:#c0392b; }
+.entrega-monto.saldado{ color:var(--green); }
+
+.entrega-prods{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:3px;
+  line-height:1.5;
+}
+
+.entrega-barra{
+  height:4px;
+  background:var(--border);
+  border-radius:4px;
+  margin-top:6px;
+  overflow:hidden;
+}
+
+.entrega-barra-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--green),#52be80);
+  border-radius:4px;
+}
+
+.btn-renovar{
+  background:var(--purple);
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  padding:12px;
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  width:100%;
+  margin-top:8px;
+}
+
+.resumen-mes-total{
+  background:linear-gradient(135deg,var(--purple),#8b5cf6);
+  color:#fff;
+  border-radius:10px;
+  padding:14px;
+  margin-bottom:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.rmt-label{ font-size:11px; opacity:.85; font-weight:600; letter-spacing:.05em; }
+.rmt-valor{ font-family:'DM Serif Display',serif; font-size:22px; }
+</style>
+</head>
+<body>
+
+<div class="brand-header">
+  <img src="logo-ulaku.png" alt="ULAKU" class="brand-logo">
+  <div>
+    <h1>ULAKU</h1>
+    <p class="subtitle">Sistema de pedidos</p>
+  </div>
+</div>
+
+<div id="alert-save" class="alert"></div>
+
+<!-- ── NAVEGACIÓN PRINCIPAL ────────────────────── -->
+<div class="nav-tabs">
+  <button class="nav-tab active" id="nav-pedidos" onclick="setTab('pedidos')">📦 Pedidos</button>
+  <button class="nav-tab" id="nav-sub" onclick="setTab('sub')">🔁 Suscripciones</button>
+  <button class="nav-tab tab-cartera" id="nav-cartera" onclick="setTab('cartera')">💰 Cartera</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TAB: PEDIDOS + SUSCRIPCIONES (formulario)
+════════════════════════════════════════════════ -->
+<div id="tab-pedidos-view">
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="btn-modo-unico" onclick="setModo('unico')">
+      📦 Pedido único
+    </button>
+    <button class="mode-btn" id="btn-modo-sub" onclick="setModo('suscripcion')">
+      🔁 Suscripción
+    </button>
+  </div>
+
+  <!-- ── CLIENTE ───────────────────────────────── -->
+  <div class="card" id="card-cliente">
+    <p class="section-title" id="titulo-cliente">Cliente</p>
+
+    <label>Seleccionar cliente</label>
+    <select id="sel-cliente" onchange="actualizarCliente()">
+      <option value="">Cargando clientes...</option>
+    </select>
+
+    <div class="info-cli" id="info-cliente">
+      <div id="cli-dir"></div>
+      <div id="cli-tel"></div>
+    </div>
+  </div>
+
+  <!-- ── PRODUCTOS ─────────────────────────────── -->
+  <div class="card" id="card-productos">
+    <p class="section-title">Productos</p>
+    <div id="productos-grid">Cargando productos...</div>
+  </div>
+
+  <!-- ── ENTREGA ───────────────────────────────── -->
+  <div class="card" id="card-entrega">
+    <p class="section-title" id="titulo-entrega">Entrega</p>
+
+    <div id="seccion-unico">
+      <div class="fecha-row">
+        <div>
+          <label>Fecha de entrega</label>
+          <input type="date" id="fecha-entrega">
+        </div>
+        <div>
+          <label>Estado de pago</label>
+          <select id="estado-pago">
+            <option value="Pendiente">Pendiente</option>
+            <option value="Pagado">Pagado ✓</option>
+            <option value="Seña">Seña recibida</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <label>Notas</label>
+        <input type="text" id="notas-unico" placeholder="Observaciones del pedido...">
+      </div>
+    </div>
+
+    <div id="seccion-recurrencia">
+
+      <!-- Mes y fecha inicio -->
+      <div class="recurrencia-grid" style="margin-bottom:10px">
+        <div>
+          <label>Mes de suscripción</label>
+          <input type="month" id="sub-mes-año" onchange="actualizarPreviewSub()">
+        </div>
+        <div>
+          <label>Fecha de inicio (cobro desde)</label>
+          <input type="date" id="sub-fecha-inicio" onchange="actualizarPreviewSub()">
+        </div>
+      </div>
+
+      <!-- Slots por día de semana -->
+      <div style="margin-bottom:8px">
+        <label>Productos por día de entrega</label>
+      </div>
+      <div id="slots-container"></div>
+      <button type="button" class="btn btn-sub" style="width:100%;padding:10px;font-size:13px;margin-bottom:10px" onclick="agregarSlot()">
+        + Agregar día de entrega
+      </button>
+
+      <div style="margin-top:4px">
+        <label>Estado de pago</label>
+        <select id="sub-estado-pago">
+          <option value="Pendiente">Pendiente</option>
+          <option value="Pagado">Pagado ✓</option>
+          <option value="Seña">Seña recibida</option>
+        </select>
+      </div>
+
+      <div style="margin-top:10px">
+        <label>Notas</label>
+        <input type="text" id="notas-sub" placeholder="Observaciones de la suscripción...">
+      </div>
+
+      <div class="recurrencia-preview" id="preview-recurrencia"></div>
+    </div>
+  </div>
+
+  <!-- ── RESUMEN ───────────────────────────────── -->
+  <div class="card" id="card-resumen" style="display:none">
+    <p class="section-title">Resumen</p>
+    <div id="resumen-items"></div>
+    <div class="divider"></div>
+    <div class="resumen-row total" id="resumen-total-row">
+      <span>Total</span>
+      <span id="total-valor">$0</span>
+    </div>
+    <div id="resumen-frecuencia" style="display:none;font-size:12px;color:var(--purple);margin-top:6px;"></div>
+  </div>
+
+  <!-- ── BOTONES ───────────────────────────────── -->
+  <div class="card">
+    <div class="btns" id="btns-unico">
+      <button class="btn btn-secondary" id="btn-guardar" onclick="guardarEnSheets()" disabled>💾 Guardar</button>
+      <button class="btn btn-calendar"  id="btn-calendar" onclick="crearEventoCalendar()" disabled>📅 Calendar</button>
+      <button class="btn btn-primary"   id="btn-whatsapp" onclick="generarWhatsApp()" disabled>💬 WhatsApp</button>
+    </div>
+
+    <div class="btns sub-btns" id="btns-sub" style="display:none">
+      <button class="btn btn-sub"    id="btn-guardar-sub" onclick="guardarSuscripcionSheets()" disabled>🔁 Crear suscripción</button>
+      <button class="btn btn-sub-wa" id="btn-whatsapp-sub" onclick="generarWhatsAppSub()" disabled>💬 WhatsApp</button>
+    </div>
+
+    <p class="wa-nota" id="wa-nota">Copia este mensaje y pégalo en WhatsApp al cliente.</p>
+    <div id="pedido-preview" class="pedido-preview"></div>
+    <button class="copy-btn" id="btn-copy" onclick="copiarMensaje()">📋 Copiar mensaje</button>
+  </div>
+
+</div><!-- /tab-pedidos-view -->
+
+
+<!-- ═══════════════════════════════════════════════
+     TAB: CARTERA — lista de clientes con saldo
+════════════════════════════════════════════════ -->
+<div id="tab-cartera-view">
+
+  <!-- Cartera general -->
+  <div id="cartera-general-view">
+    <div class="cartera-header">
+      <p class="section-title" style="margin:0">💰 Cartera pendiente</p>
+      <button class="btn btn-gold" style="padding:10px 16px;font-size:13px;" onclick="cargarCartera()">
+        🔄 Actualizar
+      </button>
+    </div>
+
+    <div id="cartera-total-box"></div>
+    <div id="cartera-lista">
+      <p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">
+        Toca "Actualizar" para ver el estado de cartera
+      </p>
+    </div>
+  </div>
+
+  <!-- Estado de cuenta detallado por cliente -->
+  <div id="estado-cuenta-view">
+    <div class="ec-header">
+      <button class="btn-back" onclick="volverCartera()">← Volver</button>
+      <strong id="ec-nombre-cliente" style="font-size:15px"></strong>
+    </div>
+
+    <!-- Navegación de mes -->
+    <div class="mes-nav">
+      <button class="mes-nav-btn" onclick="cambiarMes(-1)">‹</button>
+      <div class="mes-nav-label" id="mes-nav-label">—</div>
+      <button class="mes-nav-btn" onclick="cambiarMes(1)">›</button>
+    </div>
+
+    <!-- Resumen mensual KPIs -->
+    <div class="resumen-mes-kpis" id="ec-resumen-kpis"></div>
+
+    <!-- Totales del mes -->
+    <div id="ec-total-mes"></div>
+
+    <!-- Formulario registro de pago -->
+    <div class="pago-form">
+      <p class="pago-form-title">💳 Registrar pago</p>
+      <div class="pago-grid">
+        <div>
+          <label>Valor recibido</label>
+          <input type="number" id="pago-valor" placeholder="0" min="0" step="1000">
+        </div>
+        <div>
+          <label>Método de pago</label>
+          <select id="pago-metodo">
+            <option value="Efectivo">💵 Efectivo</option>
+            <option value="Transferencia">🏦 Transferencia</option>
+            <option value="Nequi">📱 Nequi</option>
+            <option value="Daviplata">📱 Daviplata</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:10px">
+        <label>Notas (opcional)</label>
+        <input type="text" id="pago-notas" placeholder="Referencia, observación...">
+      </div>
+      <button class="btn btn-gold" style="width:100%" id="btn-registrar-pago" onclick="registrarPago()">
+        💰 Registrar pago
+      </button>
+    </div>
+
+    <!-- Suscripción del mes -->
+    <div class="seccion-mes" id="seccion-suscripcion" style="display:none">
+      <div class="seccion-mes-titulo">🔁 Suscripción del mes</div>
+      <div id="ec-suscripcion-lista"></div>
+      <button class="btn-renovar" id="btn-renovar" onclick="renovarSuscripcion()" style="display:none">
+        🔁 Renovar para el mes siguiente
+      </button>
+    </div>
+
+    <!-- Pedidos sueltos del mes -->
+    <div class="seccion-mes" id="seccion-sueltos" style="display:none">
+      <div class="seccion-mes-titulo">📦 Pedidos sueltos</div>
+      <div id="ec-sueltos-lista"></div>
+    </div>
+
+    <div id="ec-pedidos-lista"></div>
+  </div>
+
+</div><!-- /tab-cartera-view -->
+
+
+<!-- ═══════════════════════════════════════════════
+     MODAL: RECIBO DE PAGO
+════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-recibo">
+  <div class="modal">
+    <div class="recibo" id="recibo-contenido"></div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="imprimirRecibo()">🖨️ Imprimir</button>
+      <button class="btn btn-primary"   onclick="copiarReciboWA()">💬 WhatsApp</button>
+    </div>
+    <button class="btn" style="background:var(--muted);width:100%;margin-top:8px;font-size:13px" onclick="cerrarModal()">
+      Cerrar
+    </button>
+  </div>
+</div>
+
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzOHqQskoePhBN0C_vxeYLE96bqbKAah-CCC1Dh0YFfk3G1VeOH2oSCnOpfOoS7w-Q_/exec';
+
+let CLIENTES  = [];
+let PRODUCTOS = [];
+let cantidades = {};
+let MODO = 'unico';
+let TAB_ACTUAL = 'pedidos';
+let CLIENTE_EC = null;
+let RECIBO_TEXTO_WA = '';
+
+// Suscripción: slots [{dia_semana, cantidadesSlot:{id:qty}}]
+let SLOTS = [];
+let SLOT_ID_COUNTER = 0;
+
+// Mes activo en estado de cuenta
+let MES_EC_ANIO  = new Date().getFullYear();
+let MES_EC_MES   = new Date().getMonth() + 1;
+let SUB_ACTIVA_ID = null; // id_suscripcion del mes actual para renovar
+
+const DIAS_SEMANA = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
+const MESES_ES    = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                     'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+document.addEventListener('DOMContentLoaded', iniciarFormulario);
+
+// ─────────────────────────────────────────────────────
+//  TABS
+// ─────────────────────────────────────────────────────
+
+function setTab(tab) {
+  TAB_ACTUAL = tab;
+  document.getElementById('tab-pedidos-view').style.display = (tab === 'pedidos' || tab === 'sub') ? 'block' : 'none';
+  document.getElementById('tab-cartera-view').style.display = tab === 'cartera' ? 'block' : 'none';
+  document.getElementById('nav-pedidos').className = 'nav-tab' + (tab === 'pedidos' ? ' active' : '');
+  document.getElementById('nav-sub').className     = 'nav-tab' + (tab === 'sub'     ? ' active' : '');
+  document.getElementById('nav-cartera').className = 'nav-tab tab-cartera' + (tab === 'cartera' ? ' active' : '');
+  if (tab === 'sub') setModo('suscripcion');
+  else if (tab === 'pedidos') setModo('unico');
+}
+
+// ─────────────────────────────────────────────────────
+//  INICIO
+// ─────────────────────────────────────────────────────
+
+async function iniciarFormulario() {
+  ponerFechaManana();
+  ponerMesActual();
+  await cargarDatosDesdeSheets();
+}
+
+function ponerFechaManana() {
+  const m = new Date();
+  m.setDate(m.getDate() + 1);
+  document.getElementById('fecha-entrega').value = m.toISOString().split('T')[0];
+}
+
+function ponerMesActual() {
+  const hoy = new Date();
+  document.getElementById('sub-mes-año').value  = hoy.toISOString().slice(0,7);
+  document.getElementById('sub-fecha-inicio').value = hoy.toISOString().split('T')[0];
+}
+
+// ─────────────────────────────────────────────────────
+//  MODO pedido / suscripción
+// ─────────────────────────────────────────────────────
+
+function setModo(modo) {
+  MODO = modo;
+  const esSub = modo === 'suscripcion';
+
+  document.getElementById('btn-modo-unico').className = 'mode-btn' + (!esSub ? ' active' : '');
+  document.getElementById('btn-modo-sub').className   = 'mode-btn' + (esSub  ? ' active sub-mode' : '');
+
+  document.getElementById('seccion-unico').style.display   = esSub ? 'none'  : 'block';
+  document.getElementById('seccion-recurrencia').className = 'seccion-recurrencia' + (esSub ? ' show' : '');
+  document.getElementById('btns-unico').style.display      = esSub ? 'none'  : 'grid';
+  document.getElementById('btns-sub').style.display        = esSub ? 'grid'  : 'none';
+
+  // En modo suscripción los botones de producto se ocultan (se usan dentro de cada slot)
+  document.getElementById('card-productos').style.display  = esSub ? 'none'  : 'block';
+
+  ['card-cliente','card-entrega','card-resumen'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('sub-active', esSub);
+  });
+
+  document.getElementById('titulo-entrega').innerHTML = esSub
+    ? 'Configurar suscripción <span class="sub-badge">MENSUAL</span>'
+    : 'Entrega';
+
+  document.getElementById('titulo-cliente').innerHTML = esSub
+    ? 'Cliente <span class="sub-badge">SUSCRIPCIÓN</span>'
+    : 'Cliente';
+
+  if (esSub && SLOTS.length === 0) agregarSlot();
+
+  actualizarResumen();
+  validarBtns();
+  if (esSub) actualizarPreviewSub();
+}
+
+// ─────────────────────────────────────────────────────
+//  JSONP
+// ─────────────────────────────────────────────────────
+
+function cargarJSONP(accion) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'jsonp_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+    const script = document.createElement('script');
+    window[cbName] = function(data) { delete window[cbName]; script.remove(); resolve(data); };
+    script.src = SCRIPT_URL + '?accion=' + encodeURIComponent(accion) + '&callback=' + cbName;
+    script.onerror = function() { delete window[cbName]; script.remove(); reject(new Error('No se pudo cargar ' + accion)); };
+    document.body.appendChild(script);
+  });
+}
+
+function cargarJSONPConParams(params) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'jsonp_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+    const script = document.createElement('script');
+    params.set('callback', cbName);
+    window[cbName] = function(data) { delete window[cbName]; script.remove(); resolve(data); };
+    script.src = SCRIPT_URL + '?' + params.toString();
+    script.onerror = function() { delete window[cbName]; script.remove(); reject(new Error('No se pudo conectar con Apps Script')); };
+    document.body.appendChild(script);
+  });
+}
+
+// ─────────────────────────────────────────────────────
+//  CARGA DATOS
+// ─────────────────────────────────────────────────────
+
+async function cargarDatosDesdeSheets() {
+  const alertEl = document.getElementById('alert-save');
+  try {
+    const [jsonClientes, jsonProductos] = await Promise.all([
+      cargarJSONP('clientes'),
+      cargarJSONP('productos')
+    ]);
+    if (!jsonClientes.ok) throw new Error(jsonClientes.error);
+    if (!jsonProductos.ok) throw new Error(jsonProductos.error);
+    CLIENTES  = jsonClientes.data;
+    PRODUCTOS = jsonProductos.data;
+    pintarClientes();
+    pintarProductos();
+    alertEl.className   = 'alert alert-ok show';
+    alertEl.textContent = '✅ Datos cargados correctamente';
+  } catch (err) {
+    alertEl.className   = 'alert alert-warn show';
+    alertEl.textContent = '❌ Error cargando datos: ' + err.message;
+  }
+}
+
+function pintarClientes() {
+  const sel = document.getElementById('sel-cliente');
+  sel.innerHTML = '<option value="">— Elige un cliente —</option>';
+  CLIENTES.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id; o.textContent = c.nombre;
+    sel.appendChild(o);
+  });
+}
+
+function pintarProductos() {
+  const grid = document.getElementById('productos-grid');
+  grid.innerHTML = '';
+  cantidades = {};
+  PRODUCTOS.forEach(p => {
+    cantidades[p.id] = 0;
+    const precio = Number(p.precio) || 0;
+    const row = document.createElement('div');
+    row.className = 'prod-row';
+    row.id = 'row-' + p.id;
+    row.innerHTML = `
+      <div class="prod-nombre">${p.nombre}</div>
+      <div class="prod-precio">$${precio.toLocaleString('es-CO')}<br><span style="font-size:10px">${p.unidad||''}</span></div>
+      <div class="prod-qty">
+        <button class="qty-btn" onclick="cambiarQty('${p.id}',-1)">−</button>
+        <span class="qty-num" id="qty-${p.id}">0</span>
+        <button class="qty-btn" onclick="cambiarQty('${p.id}',1)">+</button>
+      </div>
+    `;
+    grid.appendChild(row);
+  });
+}
+
+function actualizarCliente() {
+  const id  = document.getElementById('sel-cliente').value;
+  const cli = CLIENTES.find(c => c.id === id);
+  const info = document.getElementById('info-cliente');
+  if (cli) {
+    document.getElementById('cli-dir').textContent = '📍 ' + (cli.direccion || '');
+    document.getElementById('cli-tel').textContent = '📱 ' + (cli.telefono  || '');
+    info.style.display = 'block';
+  } else {
+    info.style.display = 'none';
+  }
+  validarBtns();
+}
+
+function cambiarQty(id, delta) {
+  cantidades[id] = Math.max(0, (cantidades[id] || 0) + delta);
+  document.getElementById('qty-' + id).textContent = cantidades[id];
+  const row = document.getElementById('row-' + id);
+  row.classList.toggle('activo', cantidades[id] > 0);
+  actualizarResumen();
+  validarBtns();
+}
+
+function actualizarResumen() {
+  if (MODO === 'suscripcion') {
+    actualizarResumenSub();
+    return;
+  }
+  const items = PRODUCTOS.filter(p => cantidades[p.id] > 0);
+  const card  = document.getElementById('card-resumen');
+  if (!items.length) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  let total = 0, html = '';
+  items.forEach(p => {
+    const precio = Number(p.precio) || 0;
+    const sub    = precio * cantidades[p.id];
+    total += sub;
+    html += `<div class="resumen-row"><span class="resumen-prod">${cantidades[p.id]}× ${p.nombre}</span><span>$${sub.toLocaleString('es-CO')}</span></div>`;
+  });
+  document.getElementById('resumen-items').innerHTML = html;
+  document.getElementById('total-valor').textContent = '$' + total.toLocaleString('es-CO');
+  document.getElementById('resumen-frecuencia').style.display = 'none';
+}
+
+function validarBtns() {
+  const clienteOk   = !!document.getElementById('sel-cliente').value;
+  if (MODO === 'unico') {
+    const productosOk = PRODUCTOS.some(p => cantidades[p.id] > 0);
+    const ok = clienteOk && productosOk;
+    document.getElementById('btn-guardar').disabled  = !ok;
+    document.getElementById('btn-calendar').disabled = !ok;
+    document.getElementById('btn-whatsapp').disabled = !ok;
+  } else {
+    const slotsOk = SLOTS.some(s => Object.values(s.cantidades).some(v => v > 0));
+    const mesOk   = !!document.getElementById('sub-mes-año').value;
+    const ok = clienteOk && slotsOk && mesOk;
+    document.getElementById('btn-guardar-sub').disabled  = !ok;
+    document.getElementById('btn-whatsapp-sub').disabled = !ok;
+  }
+}
+
+// ─────────────────────────────────────────────────────
+//  SLOTS DE SUSCRIPCIÓN
+// ─────────────────────────────────────────────────────
+
+function agregarSlot(diaDefault, cantidadesIniciales) {
+  const slotId = ++SLOT_ID_COUNTER;
+  const slot   = {
+    id:        slotId,
+    dia:       diaDefault || DIAS_SEMANA[0],
+    cantidades: {}
+  };
+  PRODUCTOS.forEach(p => {
+    slot.cantidades[p.id] = (cantidadesIniciales && cantidadesIniciales[p.id]) || 0;
+  });
+  SLOTS.push(slot);
+  renderizarSlot(slot);
+  actualizarPreviewSub();
+}
+
+function renderizarSlot(slot) {
+  const container = document.getElementById('slots-container');
+  const div = document.createElement('div');
+  div.className = 'slot-card';
+  div.id = 'slot-' + slot.id;
+
+  const opcionesDias = DIAS_SEMANA.map(d =>
+    `<option value="${d}" ${d === slot.dia ? 'selected' : ''}>${d.charAt(0).toUpperCase() + d.slice(1)}</option>`
+  ).join('');
+
+  let prodsHtml = PRODUCTOS.map(p => {
+    const precio = Number(p.precio) || 0;
+    const qty    = slot.cantidades[p.id] || 0;
+    return `
+      <div class="slot-prod-row">
+        <div class="slot-prod-nombre">${p.nombre}</div>
+        <div class="slot-prod-precio">$${precio.toLocaleString('es-CO')}</div>
+        <div class="slot-prod-qty">
+          <button class="slot-qty-btn" onclick="cambiarQtySlot(${slot.id},'${p.id}',-1)">−</button>
+          <span class="slot-qty-num" id="sqty-${slot.id}-${p.id}">${qty}</span>
+          <button class="slot-qty-btn" onclick="cambiarQtySlot(${slot.id},'${p.id}',1)">+</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  div.innerHTML = `
+    <div class="slot-header">
+      <select class="slot-dia-select" onchange="cambiarDiaSlot(${slot.id},this.value)">${opcionesDias}</select>
+      <span class="slot-subtotal" id="slot-sub-${slot.id}">$0</span>
+      <button class="slot-remove" onclick="eliminarSlot(${slot.id})">✕</button>
+    </div>
+    <div class="slot-productos">${prodsHtml}</div>
+  `;
+
+  container.appendChild(div);
+  actualizarSubtotalSlot(slot.id);
+}
+
+function cambiarQtySlot(slotId, prodId, delta) {
+  const slot = SLOTS.find(s => s.id === slotId);
+  if (!slot) return;
+  slot.cantidades[prodId] = Math.max(0, (slot.cantidades[prodId] || 0) + delta);
+  document.getElementById('sqty-' + slotId + '-' + prodId).textContent = slot.cantidades[prodId];
+  actualizarSubtotalSlot(slotId);
+  actualizarResumenSub();
+  validarBtns();
+}
+
+function cambiarDiaSlot(slotId, nuevoDia) {
+  const slot = SLOTS.find(s => s.id === slotId);
+  if (slot) { slot.dia = nuevoDia; actualizarPreviewSub(); }
+}
+
+function eliminarSlot(slotId) {
+  SLOTS = SLOTS.filter(s => s.id !== slotId);
+  const el = document.getElementById('slot-' + slotId);
+  if (el) el.remove();
+  actualizarResumenSub();
+  actualizarPreviewSub();
+  validarBtns();
+}
+
+function actualizarSubtotalSlot(slotId) {
+  const slot = SLOTS.find(s => s.id === slotId);
+  if (!slot) return;
+  let sub = 0;
+  PRODUCTOS.forEach(p => {
+    sub += (Number(p.precio) || 0) * (slot.cantidades[p.id] || 0);
+  });
+  const el = document.getElementById('slot-sub-' + slotId);
+  if (el) el.textContent = '$' + sub.toLocaleString('es-CO');
+}
+
+// ─────────────────────────────────────────────────────
+//  RESUMEN SUSCRIPCIÓN — calcula total del mes
+// ─────────────────────────────────────────────────────
+
+function calcularFechasMes(diaSemana, mesAño, fechaInicioStr) {
+  // diaSemana: "lunes", mesAño: "2025-05", fechaInicioStr: "2025-05-09"
+  const DIAS_JS = {
+    domingo:0, lunes:1, martes:2, 'miércoles':3, miercoles:3,
+    jueves:4, viernes:5, 'sábado':6, sabado:6
+  };
+  if (!mesAño) return [];
+  const [anio, mes] = mesAño.split('-').map(Number);
+  const diaNum      = DIAS_JS[diaSemana.toLowerCase()];
+  if (diaNum === undefined) return [];
+
+  const fechaInicio  = fechaInicioStr ? new Date(fechaInicioStr + 'T12:00:00') : new Date(anio, mes-1, 1);
+  const ultimoDia    = new Date(anio, mes, 0);
+  const fechas       = [];
+  const cursor       = new Date(fechaInicio);
+
+  while (cursor.getDay() !== diaNum) cursor.setDate(cursor.getDate() + 1);
+  while (cursor <= ultimoDia) {
+    if (cursor.getMonth() + 1 === mes) fechas.push(new Date(cursor));
+    cursor.setDate(cursor.getDate() + 7);
+  }
+  return fechas;
+}
+
+function actualizarResumenSub() {
+  const mesAño  = document.getElementById('sub-mes-año')      ? document.getElementById('sub-mes-año').value      : '';
+  const fechaIni= document.getElementById('sub-fecha-inicio') ? document.getElementById('sub-fecha-inicio').value : '';
+  const card    = document.getElementById('card-resumen');
+  const freqEl  = document.getElementById('resumen-frecuencia');
+
+  let totalMes = 0;
+  let html     = '';
+
+  SLOTS.forEach(slot => {
+    let subtotalSlot = 0;
+    PRODUCTOS.forEach(p => {
+      subtotalSlot += (Number(p.precio) || 0) * (slot.cantidades[p.id] || 0);
+    });
+    if (subtotalSlot === 0) return;
+
+    const fechas   = calcularFechasMes(slot.dia, mesAño, fechaIni);
+    const totalSlot = subtotalSlot * fechas.length;
+    totalMes += totalSlot;
+
+    const prodsSlot = PRODUCTOS
+      .filter(p => slot.cantidades[p.id] > 0)
+      .map(p => slot.cantidades[p.id] + '× ' + p.nombre)
+      .join(', ');
+
+    html += `
+      <div class="resumen-row">
+        <span class="resumen-prod">
+          <strong>${slot.dia.charAt(0).toUpperCase()+slot.dia.slice(1)}</strong>
+          <span style="font-size:11px;margin-left:4px">(${fechas.length} entregas)</span><br>
+          <span style="font-size:11px">${prodsSlot}</span>
+        </span>
+        <span>$${totalSlot.toLocaleString('es-CO')}</span>
+      </div>`;
+  });
+
+  if (!html) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  document.getElementById('resumen-items').innerHTML = html;
+  document.getElementById('total-valor').textContent = '$' + totalMes.toLocaleString('es-CO');
+  document.getElementById('resumen-total-row').className = 'resumen-row total sub-total';
+
+  if (mesAño) {
+    const [a, m] = mesAño.split('-').map(Number);
+    freqEl.textContent  = '🔁 Suscripción mensual — ' + MESES_ES[m-1] + ' ' + a;
+    freqEl.style.display = 'block';
+  }
+}
+
+function actualizarPreviewSub() {
+  actualizarResumenSub();
+  validarBtns();
+
+  const mesAño  = document.getElementById('sub-mes-año')      ? document.getElementById('sub-mes-año').value      : '';
+  const fechaIni= document.getElementById('sub-fecha-inicio') ? document.getElementById('sub-fecha-inicio').value : '';
+  const preview = document.getElementById('preview-recurrencia');
+
+  if (!mesAño || SLOTS.length === 0) { preview.classList.remove('show'); return; }
+
+  const [a, m]  = mesAño.split('-').map(Number);
+  const diasConf = SLOTS.map(s => {
+    const fechas = calcularFechasMes(s.dia, mesAño, fechaIni);
+    return `<strong>${s.dia}</strong> (${fechas.length} entregas)`;
+  }).join(', ');
+
+  preview.innerHTML = `🔁 <strong>Suscripción ${MESES_ES[m-1]} ${a}</strong><br>📅 Días: ${diasConf}${fechaIni ? '<br>📌 Desde: ' + new Date(fechaIni+'T12:00:00').toLocaleDateString('es-CO',{day:'numeric',month:'long'}) : ''}`;
+  preview.classList.add('show');
+}
+
+// ─────────────────────────────────────────────────────
+//  CONSTRUIR PEDIDO ÚNICO
+// ─────────────────────────────────────────────────────
+
+function construirPedido() {
+  const cliId = document.getElementById('sel-cliente').value;
+  const cli   = CLIENTES.find(c => c.id === cliId);
+  const fecha = document.getElementById('fecha-entrega').value;
+  const pago  = document.getElementById('estado-pago').value;
+  const notas = document.getElementById('notas-unico').value;
+  const items = PRODUCTOS.filter(p => cantidades[p.id] > 0);
+  let total   = 0;
+
+  const detalle = items.map(p => {
+    const precio   = Number(p.precio) || 0;
+    const cantidad = cantidades[p.id];
+    const subtotal = precio * cantidad;
+    total += subtotal;
+    return { codigo_producto: p.id, producto: p.nombre, cantidad, valor_unitario: precio, subtotal };
+  });
+
+  const lineas = detalle.map(item => item.cantidad + 'x ' + item.producto + ' ($' + item.subtotal.toLocaleString('es-CO') + ')');
+
+  return {
+    idPedido: 'PED-' + Date.now().toString().slice(-6),
+    cli, cliId, fecha, pago, notas, items, detalle, lineas, total,
+    fechaHoy: new Date().toLocaleDateString('es-CO')
+  };
+}
+
+// ─────────────────────────────────────────────────────
+//  CONSTRUIR SUSCRIPCIÓN
+// ─────────────────────────────────────────────────────
+
+function construirSuscripcion() {
+  const cliId  = document.getElementById('sel-cliente').value;
+  const cli    = CLIENTES.find(c => c.id === cliId);
+  const mesAño = document.getElementById('sub-mes-año').value;
+  const fechaIni = document.getElementById('sub-fecha-inicio').value;
+  const pago   = document.getElementById('sub-estado-pago').value;
+  const notas  = document.getElementById('notas-sub').value;
+
+  let totalMes = 0;
+
+  const slotsData = SLOTS
+    .filter(slot => Object.values(slot.cantidades).some(v => v > 0))
+    .map(slot => {
+      const detalle = PRODUCTOS
+        .filter(p => slot.cantidades[p.id] > 0)
+        .map(p => {
+          const precio   = Number(p.precio) || 0;
+          const cantidad = slot.cantidades[p.id];
+          const subtotal = precio * cantidad;
+          return { codigo_producto: p.id, producto: p.nombre, cantidad, valor_unitario: precio, subtotal };
+        });
+      const fechas     = calcularFechasMes(slot.dia, mesAño, fechaIni);
+      const totalSlot  = detalle.reduce((s, i) => s + i.subtotal, 0);
+      totalMes += totalSlot * fechas.length;
+      return { dia_semana: slot.dia, detalle, fechas_count: fechas.length, total_slot: totalSlot };
+    });
+
+  return { cli, cliId, mesAño, fechaIni, pago, notas, slotsData, totalMes };
+}
+
+// ─────────────────────────────────────────────────────
+//  GUARDAR PEDIDO ÚNICO
+// ─────────────────────────────────────────────────────
+
+function armarParamsPedido(p, accion) {
+  return new URLSearchParams({
+    accion,
+    id_pedido:         p.idPedido,
+    fecha_pedido:      p.fechaHoy,
+    id_cliente:        p.cliId,
+    nombre_cliente:    p.cli.nombre,
+    telefono:          p.cli.telefono  || '',
+    direccion:         p.cli.direccion || '',
+    productos:         p.lineas.join(' | '),
+    detalle_productos: JSON.stringify(p.detalle),
+    total:             p.total,
+    fecha_entrega:     p.fecha,
+    estado_pago:       p.pago,
+    notas:             p.notas || '',
+    estado_pedido:     'Pendiente',
+    origen:            'unico'
+  });
+}
+
+async function guardarEnSheets() {
+  const p       = construirPedido();
+  const btn     = document.getElementById('btn-guardar');
+  const alertEl = document.getElementById('alert-save');
+
+  btn.innerHTML = '<span class="spinner"></span>Guardando...';
+  btn.disabled  = true;
+
+  try {
+    const data = await cargarJSONPConParams(armarParamsPedido(p, 'guardarPedido'));
+    if (!data.ok) throw new Error(data.error || 'No se pudo guardar');
+    alertEl.className   = 'alert alert-ok show';
+    alertEl.textContent = '✅ Pedido ' + p.idPedido + ' guardado correctamente';
+    btn.innerHTML = '✓ Guardado';
+    limpiarFormulario();
+    setTimeout(() => { btn.innerHTML = '💾 Guardar'; btn.disabled = false; }, 3000);
+  } catch (err) {
+    alertEl.className   = 'alert alert-warn show';
+    alertEl.textContent = '❌ ' + err.message;
+    btn.innerHTML = '💾 Guardar';
+    btn.disabled  = false;
+  }
+}
+
+async function crearEventoCalendar() {
+  const p       = construirPedido();
+  const btn     = document.getElementById('btn-calendar');
+  const alertEl = document.getElementById('alert-save');
+
+  btn.innerHTML = '<span class="spinner"></span>Creando...';
+  btn.disabled  = true;
+
+  try {
+    const data = await cargarJSONPConParams(armarParamsPedido(p, 'crearCalendar'));
+    if (!data.ok) throw new Error(data.error);
+    alertEl.className   = 'alert alert-ok show';
+    alertEl.textContent = '✅ Evento creado en Google Calendar';
+    btn.innerHTML = '✓ Calendar';
+    setTimeout(() => { btn.innerHTML = '📅 Calendar'; btn.disabled = false; }, 3000);
+  } catch (err) {
+    alertEl.className   = 'alert alert-warn show';
+    alertEl.textContent = '❌ ' + err.message;
+    btn.innerHTML = '📅 Calendar';
+    btn.disabled  = false;
+  }
+}
+
+// ─────────────────────────────────────────────────────
+//  GUARDAR SUSCRIPCIÓN
+// ─────────────────────────────────────────────────────
+
+async function guardarSuscripcionSheets() {
+  const s       = construirSuscripcion();
+  const btn     = document.getElementById('btn-guardar-sub');
+  const alertEl = document.getElementById('alert-save');
+
+  if (!s.fechaIni) {
+    alertEl.className   = 'alert alert-warn show';
+    alertEl.textContent = '⚠️ Debes ingresar una fecha de inicio';
+    return;
+  }
+  if (!s.slotsData.length) {
+    alertEl.className   = 'alert alert-warn show';
+    alertEl.textContent = '⚠️ Agrega al menos un día con productos';
+    return;
+  }
+
+  btn.innerHTML = '<span class="spinner"></span>Creando suscripción...';
+  btn.disabled  = true;
+
+  const params = new URLSearchParams({
+    accion:         'guardarSuscripcion',
+    id_cliente:     s.cliId,
+    nombre_cliente: s.cli.nombre,
+    telefono:       s.cli.telefono  || '',
+    direccion:      s.cli.direccion || '',
+    mes_año:        s.mesAño,
+    fecha_inicio:   s.fechaIni,
+    total:          s.totalMes,
+    estado_pago:    s.pago,
+    notas:          s.notas || '',
+    slots:          JSON.stringify(s.slotsData.map(sl => ({
+      dia_semana: sl.dia_semana,
+      detalle:    sl.detalle
+    })))
+  });
+
+  try {
+    const data = await cargarJSONPConParams(params);
+    if (!data.ok) throw new Error(data.error);
+    alertEl.className   = 'alert alert-sub show';
+    alertEl.textContent = `🔁 ${data.id_suscripcion} creada — ${data.pedidos_creados} entregas generadas · Total: $${data.total_mensual.toLocaleString('es-CO')}`;
+    btn.innerHTML = '✓ Creada';
+    limpiarFormulario();
+    setTimeout(() => { btn.innerHTML = '🔁 Crear suscripción'; btn.disabled = false; }, 3000);
+  } catch (err) {
+    alertEl.className   = 'alert alert-warn show';
+    alertEl.textContent = '❌ ' + err.message;
+    btn.innerHTML = '🔁 Crear suscripción';
+    btn.disabled  = false;
+  }
+}
+
+// ─────────────────────────────────────────────────────
+//  LIMPIAR FORMULARIO
+// ─────────────────────────────────────────────────────
+
+function limpiarFormulario() {
+  document.getElementById('sel-cliente').value = '';
+  document.getElementById('info-cliente').style.display = 'none';
+
+  PRODUCTOS.forEach(p => {
+    cantidades[p.id] = 0;
+    const numEl = document.getElementById('qty-' + p.id);
+    const rowEl = document.getElementById('row-' + p.id);
+    if (numEl) numEl.textContent = '0';
+    if (rowEl) rowEl.classList.remove('activo','sub-activo');
+  });
+
+  ponerFechaManana();
+  ponerMesActual();
+
+  document.getElementById('estado-pago').value     = 'Pendiente';
+  document.getElementById('sub-estado-pago').value = 'Pendiente';
+  document.getElementById('notas-unico').value     = '';
+  document.getElementById('notas-sub').value       = '';
+  document.getElementById('preview-recurrencia').classList.remove('show');
+  document.getElementById('card-resumen').style.display = 'none';
+  document.getElementById('pedido-preview').classList.remove('show');
+  document.getElementById('btn-copy').style.display = 'none';
+  document.getElementById('wa-nota').style.display  = 'none';
+
+  // Limpiar slots
+  SLOTS = [];
+  SLOT_ID_COUNTER = 0;
+  document.getElementById('slots-container').innerHTML = '';
+
+  setTimeout(() => { document.getElementById('alert-save').className = 'alert'; }, 3000);
+  validarBtns();
+}
+
+// ─────────────────────────────────────────────────────
+//  WHATSAPP PEDIDO ÚNICO
+// ─────────────────────────────────────────────────────
+
+function generarWhatsApp() {
+  const p = construirPedido();
+  const fechaFmt = p.fecha
+    ? new Date(p.fecha + 'T12:00:00').toLocaleDateString('es-CO', { weekday:'long', day:'numeric', month:'long' })
+    : 'por confirmar';
+  const pagoLabel = { Pendiente:'💳 Pago pendiente', Pagado:'✅ Pagado', Seña:'⚡ Seña recibida' }[p.pago];
+  const lineasFmt = p.items.map(prod => {
+    const precio = Number(prod.precio) || 0;
+    return `  • ${cantidades[prod.id]}× ${prod.nombre} → $${(precio*cantidades[prod.id]).toLocaleString('es-CO')}`;
+  }).join('\n');
+  let msg = `*PEDIDO ULAKU*\n━━━━━━━━━━━━━━━━━━\n👤 ${p.cli.nombre}\n📍 ${p.cli.direccion||''}\n📅 Entrega: ${fechaFmt}\n━━━━━━━━━━━━━━━━━━\n${lineasFmt}\n━━━━━━━━━━━━━━━━━━\n💰 *Total: $${p.total.toLocaleString('es-CO')}*\n${pagoLabel}`;
+  if (p.notas) msg += `\n📝 ${p.notas}`;
+  mostrarPreview(msg);
+}
+
+// ─────────────────────────────────────────────────────
+//  WHATSAPP SUSCRIPCIÓN — resumen completo del mes
+// ─────────────────────────────────────────────────────
+
+function generarWhatsAppSub() {
+  const s = construirSuscripcion();
+  if (!s.slotsData.length) { alert('Agrega al menos un día con productos'); return; }
+
+  const [a, m] = s.mesAño.split('-').map(Number);
+  const mesLabel = MESES_ES[m-1] + ' ' + a;
+  const fechaIniStr = s.fechaIni
+    ? new Date(s.fechaIni + 'T12:00:00').toLocaleDateString('es-CO', { day:'numeric', month:'long' })
+    : 'desde el inicio del mes';
+  const pagoLabel = { Pendiente:'💳 Pago al cierre del mes', Pagado:'✅ Pagado', Seña:'⚡ Seña recibida' }[s.pago] || s.pago;
+
+  const lineasSlots = s.slotsData.map(sl => {
+    const prods = sl.detalle.map(i => `${i.cantidad}× ${i.producto}`).join(', ');
+    return `  📅 ${sl.dia_semana.charAt(0).toUpperCase()+sl.dia_semana.slice(1)} (${sl.fechas_count} entregas): ${prods} → $${(sl.total_slot * sl.fechas_count).toLocaleString('es-CO')}`;
+  }).join('\n');
+
+  let msg =
+    `*SUSCRIPCIÓN MENSUAL ULAKU* 🔁\n` +
+    `━━━━━━━━━━━━━━━━━━\n` +
+    `👤 *${s.cli.nombre}*\n` +
+    `📱 ${s.cli.telefono || '—'}\n` +
+    `📍 ${s.cli.direccion || '—'}\n` +
+    `📆 Mes: *${mesLabel}*\n` +
+    `📌 Inicio: ${fechaIniStr}\n` +
+    `━━━━━━━━━━━━━━━━━━\n` +
+    `*Plan de entregas:*\n${lineasSlots}\n` +
+    `━━━━━━━━━━━━━━━━━━\n` +
+    `💰 *Total ${mesLabel}: $${s.totalMes.toLocaleString('es-CO')}*\n` +
+    `${pagoLabel}`;
+
+  if (s.notas) msg += `\n📝 ${s.notas}`;
+  msg += `\n━━━━━━━━━━━━━━━━━━\n_Puedes cancelar en cualquier momento._`;
+
+  mostrarPreview(msg);
+}
+
+function mostrarPreview(msg) {
+  const prev = document.getElementById('pedido-preview');
+  prev.textContent = msg;
+  prev.classList.add('show');
+  document.getElementById('btn-copy').style.display = 'inline-block';
+  document.getElementById('wa-nota').style.display  = 'block';
+}
+
+function copiarMensaje() {
+  navigator.clipboard.writeText(document.getElementById('pedido-preview').textContent).then(() => {
+    const b = document.getElementById('btn-copy');
+    b.textContent = '✓ Copiado';
+    setTimeout(() => { b.textContent = '📋 Copiar mensaje'; }, 2000);
+  });
+}
+
+// ─────────────────────────────────────────────────────
+//  CARTERA
+// ─────────────────────────────────────────────────────
+
+async function cargarCartera() {
+  const lista    = document.getElementById('cartera-lista');
+  const totalBox = document.getElementById('cartera-total-box');
+  lista.innerHTML    = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">⏳ Cargando cartera...</p>';
+  totalBox.innerHTML = '';
+
+  try {
+    const data = await cargarJSONP('obtenerCartera');
+    if (!data.ok) throw new Error(data.error);
+
+    const clientes = data.data || [];
+    const total    = data.total_cartera || 0;
+
+    totalBox.innerHTML = `
+      <div class="cartera-total">
+        <div class="ct-label">Cartera total pendiente</div>
+        <div class="ct-monto">$${total.toLocaleString('es-CO')}</div>
+        <div class="ct-clientes">${clientes.length} cliente${clientes.length !== 1 ? 's' : ''} con saldo</div>
+      </div>`;
+
+    if (!clientes.length) {
+      lista.innerHTML = '<p style="color:var(--green);font-size:13px;text-align:center;padding:20px 0">✅ Sin cartera pendiente</p>';
+      return;
+    }
+
+    lista.innerHTML = '';
+    clientes.forEach(c => {
+      const pct = total > 0 ? (c.saldo_pendiente / total * 100) : 0;
+      const div = document.createElement('div');
+      div.className = 'cli-card';
+      div.onclick   = () => abrirEstadoCuenta(c.id_cliente, c.nombre_cliente);
+      div.innerHTML = `
+        <div class="cli-card-top">
+          <div class="cli-card-nombre">${c.nombre_cliente}</div>
+          <div class="cli-card-saldo">$${c.saldo_pendiente.toLocaleString('es-CO')}</div>
+        </div>
+        <div class="cli-card-meta">
+          ${c.pedidos_pendientes} pedido${c.pedidos_pendientes !== 1 ? 's' : ''} pendiente${c.pedidos_pendientes !== 1 ? 's' : ''}
+          &nbsp;·&nbsp; Último: ${c.ultimo_pedido || '—'}
+        </div>
+        <div class="cli-card-bar-bg">
+          <div class="cli-card-bar" style="width:${pct.toFixed(1)}%"></div>
+        </div>`;
+      lista.appendChild(div);
+    });
+
+  } catch (err) {
+    lista.innerHTML = `<p style="color:#c0392b;font-size:13px;text-align:center;padding:20px 0">❌ ${err.message}</p>`;
+  }
+}
+
+// ─────────────────────────────────────────────────────
+//  ESTADO DE CUENTA — vista por mes
+// ─────────────────────────────────────────────────────
+
+async function abrirEstadoCuenta(idCliente, nombreCliente) {
+  CLIENTE_EC   = { id: idCliente, nombre: nombreCliente };
+  MES_EC_ANIO  = new Date().getFullYear();
+  MES_EC_MES   = new Date().getMonth() + 1;
+
+  document.getElementById('cartera-general-view').style.display = 'none';
+  document.getElementById('estado-cuenta-view').style.display   = 'block';
+  document.getElementById('ec-nombre-cliente').textContent       = nombreCliente;
+
+  await cargarResumenMes();
+}
+
+async function cambiarMes(delta) {
+  MES_EC_MES += delta;
+  if (MES_EC_MES > 12) { MES_EC_MES = 1;  MES_EC_ANIO++; }
+  if (MES_EC_MES < 1)  { MES_EC_MES = 12; MES_EC_ANIO--; }
+  await cargarResumenMes();
+}
+
+async function cargarResumenMes() {
+  if (!CLIENTE_EC) return;
+
+  const mesAño  = MES_EC_ANIO + '-' + String(MES_EC_MES).padStart(2,'0');
+  const mesLabel = MESES_ES[MES_EC_MES-1] + ' ' + MES_EC_ANIO;
+
+  document.getElementById('mes-nav-label').textContent  = mesLabel;
+  document.getElementById('ec-resumen-kpis').innerHTML  = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:10px 0">⏳ Cargando...</p>';
+  document.getElementById('ec-total-mes').innerHTML     = '';
+  document.getElementById('seccion-suscripcion').style.display = 'none';
+  document.getElementById('seccion-sueltos').style.display     = 'none';
+  document.getElementById('ec-pedidos-lista').innerHTML = '';
+  SUB_ACTIVA_ID = null;
+
+  try {
+    const params = new URLSearchParams({ accion: 'resumenMes', id_cliente: CLIENTE_EC.id, mes_año: mesAño });
+    const data   = await cargarJSONPConParams(params);
+    if (!data.ok) throw new Error(data.error);
+
+    // KPIs
+    document.getElementById('ec-resumen-kpis').innerHTML = `
+      <div class="ec-kpi">
+        <div class="ec-kpi-label">Facturado</div>
+        <div class="ec-kpi-valor">$${data.total_mes.toLocaleString('es-CO')}</div>
+      </div>
+      <div class="ec-kpi">
+        <div class="ec-kpi-label">Pagado</div>
+        <div class="ec-kpi-valor verde">$${data.pagado_mes.toLocaleString('es-CO')}</div>
+      </div>
+      <div class="ec-kpi">
+        <div class="ec-kpi-label">Saldo</div>
+        <div class="ec-kpi-valor rojo">$${data.saldo_mes.toLocaleString('es-CO')}</div>
+      </div>`;
+
+    // Total mes banner
+    if (data.total_mes > 0) {
+      document.getElementById('ec-total-mes').innerHTML = `
+        <div class="resumen-mes-total">
+          <div><div class="rmt-label">Total ${mesLabel}</div><div style="font-size:11px;opacity:.8">${(data.suscripciones||[]).length + (data.sueltos||[]).length} entregas</div></div>
+          <div class="rmt-valor">$${data.total_mes.toLocaleString('es-CO')}</div>
+        </div>`;
+    }
+
+    // Suscripciones del mes
+    const subs = data.suscripciones || [];
+    if (subs.length) {
+      document.getElementById('seccion-suscripcion').style.display = 'block';
+      if (data.info_suscripcion) SUB_ACTIVA_ID = data.info_suscripcion.id_suscripcion;
+
+      const listaSub = document.getElementById('ec-suscripcion-lista');
+      listaSub.innerHTML = '';
+      subs.forEach(ped => pintarEntregaItem(listaSub, ped, 'sub'));
+
+      // Botón renovar — solo si es el mes actual o anterior
+      const hoy = new Date();
+      const esRenovable = (MES_EC_ANIO === hoy.getFullYear() && MES_EC_MES === hoy.getMonth() + 1) ||
+                          (MES_EC_ANIO === hoy.getFullYear() && MES_EC_MES === hoy.getMonth()) ||
+                          (MES_EC_ANIO === hoy.getFullYear() - 1 && MES_EC_MES === 12 && hoy.getMonth() === 0);
+      if (SUB_ACTIVA_ID && esRenovable) {
+        document.getElementById('btn-renovar').style.display = 'block';
+      }
+    }
+
+    // Pedidos sueltos
+    const sueltos = data.sueltos || [];
+    if (sueltos.length) {
+      document.getElementById('seccion-sueltos').style.display = 'block';
+      const listaSueltos = document.getElementById('ec-sueltos-lista');
+      listaSueltos.innerHTML = '';
+      sueltos.forEach(ped => pintarEntregaItem(listaSueltos, ped, 'unico'));
+    }
+
+    if (!subs.length && !sueltos.length) {
+      document.getElementById('ec-pedidos-lista').innerHTML =
+        '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Sin entregas en ' + mesLabel + '</p>';
+    }
+
+  } catch(err) {
+    document.getElementById('ec-resumen-kpis').innerHTML =
+      `<p style="color:#c0392b;font-size:13px;text-align:center;padding:10px 0">❌ ${err.message}</p>`;
+  }
+}
+
+function pintarEntregaItem(container, ped, tipo) {
+  const pct     = ped.total > 0 ? (ped.pagado / ped.total * 100) : 100;
+  const saldado = ped.saldo <= 0;
+
+  const fechaEnt = ped.fecha_entrega
+    ? (() => {
+        const d = typeof ped.fecha_entrega === 'string' && ped.fecha_entrega.includes('-')
+          ? new Date(ped.fecha_entrega + 'T12:00:00')
+          : new Date(ped.fecha_entrega);
+        return d.toLocaleDateString('es-CO', { weekday:'long', day:'numeric', month:'short' });
+      })()
+    : ped.fecha_pedido || '—';
+
+  const prodsTexto = (ped.productos || []).map(p => p.cantidad + '× ' + p.producto).join(', ');
+
+  const pagosHtml = ped.pagos && ped.pagos.length
+    ? '<div class="ped-pagos-list">' +
+      ped.pagos.map(pg =>
+        `<div class="ped-pago-row"><span>✓ ${pg.fecha} — ${pg.metodo}</span><span>$${pg.valor.toLocaleString('es-CO')}</span></div>`
+      ).join('') + '</div>'
+    : '';
+
+  const div = document.createElement('div');
+  div.className = `entrega-item ${tipo}` + (saldado ? ' saldado' : '');
+  div.innerHTML = `
+    <div class="entrega-top">
+      <div>
+        <div class="entrega-fecha">${tipo === 'sub' ? '🔁' : '📦'} ${fechaEnt}</div>
+        ${ped.dia_semana ? `<div class="entrega-dia">${ped.dia_semana}</div>` : ''}
+      </div>
+      <div class="entrega-monto ${saldado ? 'saldado' : 'pendiente'}">
+        ${saldado ? '✅ Saldado' : '$' + ped.saldo.toLocaleString('es-CO')}
+      </div>
+    </div>
+    ${prodsTexto ? `<div class="entrega-prods">${prodsTexto}</div>` : ''}
+    <div class="entrega-barra"><div class="entrega-barra-fill" style="width:${pct.toFixed(1)}%"></div></div>
+    <div style="font-size:11px;color:var(--muted);margin-top:3px">
+      Total: $${ped.total.toLocaleString('es-CO')} · Pagado: $${ped.pagado.toLocaleString('es-CO')}
+    </div>
+    ${pagosHtml}`;
+  container.appendChild(div);
+}
+
+function volverCartera() {
+  document.getElementById('estado-cuenta-view').style.display   = 'none';
+  document.getElementById('cartera-general-view').style.display = 'block';
+  CLIENTE_EC    = null;
+  SUB_ACTIVA_ID = null;
+  document.getElementById('pago-valor').value = '';
+  document.getElementById('pago-notas').value = '';
+}
+
+// ─────────────────────────────────────────────────────
+//  RENOVAR SUSCRIPCIÓN
+// ─────────────────────────────────────────────────────
+
+async function renovarSuscripcion() {
+  if (!SUB_ACTIVA_ID || !CLIENTE_EC) return;
+
+  // Calcular mes siguiente
+  let mesSig = MES_EC_MES + 1, anioSig = MES_EC_ANIO;
+  if (mesSig > 12) { mesSig = 1; anioSig++; }
+  const mesAñoNuevo = anioSig + '-' + String(mesSig).padStart(2,'0');
+
+  const alertEl = document.getElementById('alert-save');
+  try {
+    const params = new URLSearchParams({
+      accion:          'renovarSuscripcion',
+      id_suscripcion:  SUB_ACTIVA_ID,
+      mes_año_nuevo:   mesAñoNuevo
+    });
+    const data = await cargarJSONPConParams(params);
+    if (!data.ok) throw new Error(data.error);
+
+    // Pre-llenar el formulario de suscripción con los datos del mes anterior
+    setTab('sub');
+
+    document.getElementById('sel-cliente').value = data.info_cliente.id_cliente;
+    actualizarCliente();
+    document.getElementById('sub-mes-año').value       = mesAñoNuevo;
+    document.getElementById('sub-fecha-inicio').value  = anioSig + '-' + String(mesSig).padStart(2,'0') + '-01';
+    document.getElementById('sub-estado-pago').value   = data.info_cliente.estado_pago || 'Pendiente';
+    document.getElementById('notas-sub').value         = data.info_cliente.notas || '';
+
+    // Limpiar slots anteriores
+    SLOTS = [];
+    SLOT_ID_COUNTER = 0;
+    document.getElementById('slots-container').innerHTML = '';
+
+    // Recrear slots con datos del mes anterior
+    data.slots.forEach(slot => {
+      const cantIni = {};
+      slot.detalle.forEach(item => {
+        const prod = PRODUCTOS.find(p => p.id === item.codigo_producto || p.nombre === item.producto);
+        if (prod) cantIni[prod.id] = item.cantidad;
+      });
+      agregarSlot(slot.dia_semana, cantIni);
+    });
+
+    actualizarPreviewSub();
+
+    alertEl.className   = 'alert alert-sub show';
+    alertEl.textContent = `🔁 Formulario pre-llenado con ${MESES_ES[MES_EC_MES-1]}. Ajusta y guarda la suscripción de ${MESES_ES[mesSig-1]}.`;
+
+  } catch(err) {
+    alertEl.className   = 'alert alert-warn show';
+    alertEl.textContent = '❌ ' + err.message;
+  }
+}
+
+// ─────────────────────────────────────────────────────
+//  REGISTRAR PAGO
+// ─────────────────────────────────────────────────────
+
+async function registrarPago() {
+  if (!CLIENTE_EC) return;
+
+  const valor  = parseFloat(document.getElementById('pago-valor').value);
+  const metodo = document.getElementById('pago-metodo').value;
+  const notas  = document.getElementById('pago-notas').value;
+
+  if (!valor || valor <= 0) { alert('Ingresa un valor de pago válido'); return; }
+
+  const btn = document.getElementById('btn-registrar-pago');
+  btn.innerHTML = '<span class="spinner"></span>Registrando...';
+  btn.disabled  = true;
+
+  const params = new URLSearchParams({
+    accion:         'registrarPago',
+    id_cliente:     CLIENTE_EC.id,
+    nombre_cliente: CLIENTE_EC.nombre,
+    valor, metodo, notas
+  });
+
+  try {
+    const data = await cargarJSONPConParams(params);
+    if (!data.ok) throw new Error(data.error);
+
+    mostrarRecibo(data, CLIENTE_EC.nombre, valor, metodo, notas);
+    btn.innerHTML = '✓ Registrado';
+    setTimeout(() => { btn.innerHTML = '💰 Registrar pago'; btn.disabled = false; }, 2000);
+    setTimeout(() => cargarResumenMes(), 1500);
+
+  } catch(err) {
+    alert('❌ ' + err.message);
+    btn.innerHTML = '💰 Registrar pago';
+    btn.disabled  = false;
+  }
+}
+
+// ─────────────────────────────────────────────────────
+//  RECIBO
+// ─────────────────────────────────────────────────────
+
+function mostrarRecibo(data, nombreCliente, valorTotal, metodo, notas) {
+  const fecha = new Date().toLocaleDateString('es-CO', { day:'numeric', month:'long', year:'numeric' });
+  const hora  = new Date().toLocaleTimeString('es-CO', { hour:'2-digit', minute:'2-digit' });
+
+  const aplicacionesHtml = data.aplicaciones && data.aplicaciones.length
+    ? data.aplicaciones.map(a => `📄 ${a.id_pedido} → $${a.monto.toLocaleString('es-CO')}`).join('\n')
+    : '';
+
+  RECIBO_TEXTO_WA = `*RECIBO DE PAGO — ULAKU*\n━━━━━━━━━━━━━━━━━━\n` +
+    `📋 ID: ${data.id_pago}\n👤 Cliente: ${nombreCliente}\n📅 Fecha: ${fecha} ${hora}\n💳 Método: ${metodo}\n` +
+    `━━━━━━━━━━━━━━━━━━\n💰 *Pago recibido: $${valorTotal.toLocaleString('es-CO')}*\n` +
+    (aplicacionesHtml ? `\nAplicado a:\n${aplicacionesHtml}\n` : '') +
+    (data.abono_cuenta > 0 ? `💾 Abono a cuenta: $${data.abono_cuenta.toLocaleString('es-CO')}\n` : '') +
+    (notas ? `\n📝 ${notas}\n` : '') +
+    `━━━━━━━━━━━━━━━━━━\nGracias por tu pago 🙏`;
+
+  document.getElementById('recibo-contenido').innerHTML = `
+    <div class="recibo">
+      <div class="recibo-header">
+        <div class="recibo-marca">ULAKU</div>
+        <div class="recibo-sub">Recibo de pago</div>
+      </div>
+      <div class="recibo-id">ID: ${data.id_pago} &nbsp;·&nbsp; ${fecha} ${hora}</div>
+      <div class="recibo-section">
+        <div class="recibo-section-title">Cliente</div>
+        <div class="recibo-row"><span>Nombre</span><span><strong>${nombreCliente}</strong></span></div>
+        <div class="recibo-row"><span>Método de pago</span><span>${metodo}</span></div>
+        ${notas ? `<div class="recibo-row"><span>Nota</span><span>${notas}</span></div>` : ''}
+      </div>
+      <div class="recibo-total">
+        <div class="recibo-total-label">PAGO RECIBIDO</div>
+        <div class="recibo-total-monto">$${valorTotal.toLocaleString('es-CO')}</div>
+      </div>
+      ${aplicacionesHtml ? `
+      <div class="recibo-section">
+        <div class="recibo-section-title">Aplicado a pedidos</div>
+        <div class="recibo-aplicaciones">${aplicacionesHtml.replace(/\n/g,'<br>')}</div>
+      </div>` : ''}
+      ${data.abono_cuenta > 0 ? `
+      <div class="recibo-saldo saldado">
+        <div class="recibo-saldo-label">Abono a cuenta</div>
+        <div class="recibo-saldo-monto">$${data.abono_cuenta.toLocaleString('es-CO')}</div>
+      </div>` : ''}
+      <div class="recibo-footer">ULAKU · Sistema de pedidos<br>${fecha}</div>
+    </div>`;
+
+  document.getElementById('modal-recibo').classList.add('show');
+}
+
+function cerrarModal()   { document.getElementById('modal-recibo').classList.remove('show'); }
+function imprimirRecibo(){ window.print(); }
+function copiarReciboWA(){
+  navigator.clipboard.writeText(RECIBO_TEXTO_WA).then(() => alert('✅ Recibo copiado — pégalo en WhatsApp'));
+}
+
+</script>
+</body>
+</html>
