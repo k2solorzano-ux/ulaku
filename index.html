@@ -75,7 +75,7 @@ h1{
 /* ── NAV TABS ─────────────────────────────── */
 .nav-tabs{
   display:grid;
-  grid-template-columns:1fr 1fr 1fr 1fr;
+ grid-template-columns:1fr 1fr 1fr 1fr 1fr;
   background:var(--soft);
   border:1px solid var(--border);
   border-radius:12px;
@@ -1326,6 +1326,7 @@ select:focus, input:focus{
   <button class="nav-tab" id="nav-sub" onclick="setTab('sub')">🔁 Suscripciones</button>
   <button class="nav-tab tab-cartera" id="nav-cartera" onclick="setTab('cartera')">💰 Cartera</button>
   <button class="nav-tab tab-factura" id="nav-factura" onclick="setTab('factura')">🧾 Factura</button>
+  <button class="nav-tab" id="nav-clientes" onclick="setTab('clientes')">👤 Clientes</button>
 </div>
 
 <!-- ═══════════════════════════════════════════════
@@ -1461,7 +1462,41 @@ select:focus, input:focus{
 
 </div><!-- /tab-pedidos-view -->
 
+<div id="tab-clientes-view" style="display:none">
+  <div class="card">
+    <p class="section-title">👤 Crear o editar cliente</p>
 
+    <label>Cliente existente</label>
+    <select id="cliente-edit-select" onchange="cargarClienteParaEditar()">
+      <option value="">— Crear cliente nuevo —</option>
+    </select>
+
+  <div style="margin-top:10px">
+    <label>ID Cliente</label>
+    <input type="text" id="cli-id" readonly style="background:#f1f1f1;font-weight:700">
+  </div>
+
+    <div style="margin-top:10px">
+      <label>Nombre</label>
+      <input type="text" id="cli-nombre" placeholder="Nombre del cliente">
+    </div>
+
+    <div style="margin-top:10px">
+      <label>Dirección</label>
+      <input type="text" id="cli-direccion" placeholder="Dirección de entrega">
+    </div>
+
+    <div style="margin-top:10px">
+      <label>Teléfono</label>
+      <input type="text" id="cli-telefono" placeholder="Número de WhatsApp">
+    </div>
+
+    <div class="btns" style="grid-template-columns:1fr 1fr;margin-top:14px">
+      <button class="btn btn-secondary" onclick="limpiarFormularioCliente()">➕ Nuevo</button>
+      <button class="btn btn-primary" onclick="guardarCliente()">💾 Guardar cliente</button>
+    </div>
+  </div>
+</div>
 <!-- ═══════════════════════════════════════════════
      TAB: CARTERA — lista de clientes con saldo
 ════════════════════════════════════════════════ -->
@@ -1634,16 +1669,22 @@ document.addEventListener('DOMContentLoaded', iniciarFormulario);
 
 function setTab(tab) {
   TAB_ACTUAL = tab;
+
   document.getElementById('tab-pedidos-view').style.display  = (tab === 'pedidos' || tab === 'sub') ? 'block' : 'none';
   document.getElementById('tab-cartera-view').style.display  = tab === 'cartera' ? 'block' : 'none';
   document.getElementById('tab-factura-view').style.display  = tab === 'factura' ? 'block' : 'none';
+  document.getElementById('tab-clientes-view').style.display = tab === 'clientes' ? 'block' : 'none';
+
   document.getElementById('nav-pedidos').className = 'nav-tab' + (tab === 'pedidos' ? ' active' : '');
-  document.getElementById('nav-sub').className     = 'nav-tab' + (tab === 'sub'     ? ' active' : '');
+  document.getElementById('nav-sub').className = 'nav-tab' + (tab === 'sub' ? ' active' : '');
   document.getElementById('nav-cartera').className = 'nav-tab tab-cartera' + (tab === 'cartera' ? ' active' : '');
   document.getElementById('nav-factura').className = 'nav-tab tab-factura' + (tab === 'factura' ? ' active' : '');
+  document.getElementById('nav-clientes').className = 'nav-tab' + (tab === 'clientes' ? ' active' : '');
+
   if (tab === 'sub') setModo('suscripcion');
-  else if (tab === 'pedidos') setModo('unico');
+  if (tab === 'pedidos') setModo('unico');
   if (tab === 'factura') iniciarFacSelector();
+  if (tab === 'clientes') pintarClientesEditor();
 }
 
 // ─────────────────────────────────────────────────────
@@ -1750,6 +1791,7 @@ async function cargarDatosDesdeSheets() {
     CLIENTES  = jsonClientes.data;
     PRODUCTOS = jsonProductos.data;
     pintarClientes();
+    pintarClientesEditor();
     pintarProductos();
     alertEl.className   = 'alert alert-ok show';
     alertEl.textContent = '✅ Datos cargados correctamente';
@@ -2939,7 +2981,93 @@ function copiarFacturaWA() {
 function imprimirFactura() {
   window.print();
 }
+function pintarClientesEditor() {
+  const sel = document.getElementById('cliente-edit-select');
+  if (!sel) return;
 
+  sel.innerHTML = '<option value="">— Crear cliente nuevo —</option>';
+
+  CLIENTES.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id;
+    o.textContent = `${c.id} — ${c.nombre}`;
+    sel.appendChild(o);
+  });
+
+  if (!document.getElementById('cliente-edit-select').value) {
+    limpiarFormularioCliente();
+  }
+}
+function cargarClienteParaEditar() {
+  const id = document.getElementById('cliente-edit-select').value;
+  const c = CLIENTES.find(x => String(x.id) === String(id));
+
+  if (!c) {
+    limpiarFormularioCliente();
+    return;
+  }
+
+  document.getElementById('cli-id').value = c.id || '';
+  document.getElementById('cli-nombre').value = c.nombre || '';
+  document.getElementById('cli-direccion').value = c.direccion || '';
+  document.getElementById('cli-telefono').value = c.telefono || '';
+}
+
+function limpiarFormularioCliente() {
+  document.getElementById('cliente-edit-select').value = '';
+
+  const ids = CLIENTES.map(c => {
+    const match = String(c.id || '').match(/^CLI-(\d+)$/);
+    return match ? parseInt(match[1], 10) : 0;
+  });
+
+  const maxId = ids.length ? Math.max(...ids) : 0;
+  const siguiente = 'CLI-' + String(maxId + 1).padStart(3, '0');
+
+  document.getElementById('cli-id').value = siguiente;
+  document.getElementById('cli-nombre').value = '';
+  document.getElementById('cli-direccion').value = '';
+  document.getElementById('cli-telefono').value = '';
+}
+
+async function guardarCliente() {
+  const alertEl = document.getElementById('alert-save');
+
+  const id = document.getElementById('cli-id').value.trim();
+  const nombre = document.getElementById('cli-nombre').value.trim();
+  const direccion = document.getElementById('cli-direccion').value.trim();
+  const telefono = document.getElementById('cli-telefono').value.trim();
+
+  if (!id || !nombre) {
+    alertEl.className = 'alert alert-warn show';
+    alertEl.textContent = '❌ Debes ingresar ID y nombre del cliente';
+    return;
+  }
+
+  const params = new URLSearchParams({
+    accion: 'guardarCliente',
+    id,
+    nombre,
+    direccion,
+    telefono
+  });
+
+  try {
+    const r = await cargarJSONPConParams(params);
+
+    if (!r.ok) throw new Error(r.error);
+
+    alertEl.className = 'alert alert-ok show';
+    alertEl.textContent = '✅ ' + r.mensaje;
+
+    await cargarDatosDesdeSheets();
+    limpiarFormularioCliente();
+
+  } catch (err) {
+    alertEl.className = 'alert alert-warn show';
+    alertEl.textContent = '❌ Error guardando cliente: ' + err.message;
+  }
+}
 </script>
 </body>
 </html>
