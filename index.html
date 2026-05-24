@@ -1664,6 +1664,43 @@ const MESES_ES    = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
 document.addEventListener('DOMContentLoaded', iniciarFormulario);
 
 // ─────────────────────────────────────────────────────
+//  UTILIDAD: parseo robusto de fechas desde Sheets
+//  Soporta: yyyy-MM-dd | dd/MM/yyyy | serial numérico de Sheets
+// ─────────────────────────────────────────────────────
+function parseFechaHTML(str) {
+  if (!str && str !== 0) return null;
+  // Si ya es Date, devolverlo directamente
+  if (str instanceof Date) return isNaN(str.getTime()) ? null : str;
+  const s = String(str).trim();
+  if (!s || s === 'Invalid Date') return null;
+
+  // yyyy-MM-dd  (formato ISO, viene del input[type=date] y del GAS suscripción)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const [a, m, d] = s.split('-').map(Number);
+    return new Date(a, m - 1, d);
+  }
+
+  // dd/MM/yyyy  (formato que guarda GAS en fecha_pedido y algunos campos)
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+    const parts = s.split('/').map(Number);
+    // Si el primer número > 12, seguro es día
+    if (parts[0] > 12) return new Date(parts[2], parts[1] - 1, parts[0]);
+    // Si el segundo > 12, seguro es día en posición 2 (MM/dd/yyyy) — no debería ocurrir, pero seguro
+    return new Date(parts[2], parts[1] - 1, parts[0]);
+  }
+
+  // Serial numérico de Google Sheets (días desde 1899-12-30)
+  if (/^\d+(\.\d+)?$/.test(s)) {
+    const serial = Math.floor(Number(s));
+    const base   = new Date(1899, 11, 30);
+    base.setDate(base.getDate() + serial);
+    return base;
+  }
+
+  return null;
+}
+
+// ─────────────────────────────────────────────────────
 //  TABS
 // ─────────────────────────────────────────────────────
 
@@ -2549,18 +2586,18 @@ async function cargarResumenMes() {
   }
 }
 
+// ─────────────────────────────────────────────────────
+//  FIX: parseo robusto de fechas en pintarEntregaItem
+// ─────────────────────────────────────────────────────
 function pintarEntregaItem(container, ped, tipo) {
   const pct     = ped.total > 0 ? (ped.pagado / ped.total * 100) : 100;
   const saldado = ped.saldo <= 0;
 
-  const fechaEnt = ped.fecha_entrega
-    ? (() => {
-        const d = typeof ped.fecha_entrega === 'string' && ped.fecha_entrega.includes('-')
-          ? new Date(ped.fecha_entrega + 'T12:00:00')
-          : new Date(ped.fecha_entrega);
-        return d.toLocaleDateString('es-CO', { weekday:'long', day:'numeric', month:'short' });
-      })()
-    : ped.fecha_pedido || '—';
+  // FIX: usar parseFechaHTML para manejar dd/MM/yyyy, yyyy-MM-dd y seriales
+  const fechaObj = parseFechaHTML(ped.fecha_entrega);
+  const fechaEnt = fechaObj
+    ? fechaObj.toLocaleDateString('es-CO', { weekday:'long', day:'numeric', month:'short' })
+    : (ped.fecha_pedido || '—');
 
   const prodsTexto = (ped.productos || []).map(p => p.cantidad + '× ' + p.producto).join(', ');
 
@@ -2814,6 +2851,9 @@ async function generarFactura() {
   }
 }
 
+// ─────────────────────────────────────────────────────
+//  FIX: renderFactura usa parseFechaHTML para fechas robustas
+// ─────────────────────────────────────────────────────
 function renderFactura(data, cliente, mes, anio) {
   const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
                  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -2838,18 +2878,15 @@ function renderFactura(data, cliente, mes, anio) {
     const prods = (ped.productos || []);
     if (!prods.length) return;
 
-    const fechaObj = ped.fecha_entrega
-      ? (typeof ped.fecha_entrega === 'string' && ped.fecha_entrega.includes('-')
-          ? new Date(ped.fecha_entrega + 'T12:00:00')
-          : new Date(ped.fecha_entrega))
-      : null;
+    // FIX: usar parseFechaHTML en lugar de new Date() directo
+    const fechaObj = parseFechaHTML(ped.fecha_entrega);
 
     const diaLabel = fechaObj
       ? fechaObj.toLocaleDateString('es-CO', { weekday:'long' }).replace(/^\w/, c => c.toUpperCase())
       : '';
     const fechaLabel = fechaObj
       ? fechaObj.toLocaleDateString('es-CO', { day:'2-digit', month:'2-digit', year:'numeric' })
-      : ped.fecha_pedido || '—';
+      : (ped.fecha_pedido || '—');
 
     prods.forEach(p => {
       const qty   = Number(p.cantidad) || 1;
