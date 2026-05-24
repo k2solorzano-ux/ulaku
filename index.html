@@ -1674,6 +1674,14 @@ function parseFechaHTML(str) {
   const s = String(str).trim();
   if (!s || s === 'Invalid Date') return null;
 
+  // ISO con hora: "2026-05-08T05:00:00.000Z" o "2026-05-08T05:00:00"
+  // Tomar solo la parte de fecha e ignorar la hora completamente
+  if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
+    const soloFecha = s.split('T')[0];
+    const [a, m, d] = soloFecha.split('-').map(Number);
+    return new Date(a, m - 1, d);
+  }
+
   // yyyy-MM-dd  (formato ISO, viene del input[type=date] y del GAS suscripción)
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
     const [a, m, d] = s.split('-').map(Number);
@@ -1683,9 +1691,7 @@ function parseFechaHTML(str) {
   // dd/MM/yyyy  (formato que guarda GAS en fecha_pedido y algunos campos)
   if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
     const parts = s.split('/').map(Number);
-    // Si el primer número > 12, seguro es día
     if (parts[0] > 12) return new Date(parts[2], parts[1] - 1, parts[0]);
-    // Si el segundo > 12, seguro es día en posición 2 (MM/dd/yyyy) — no debería ocurrir, pero seguro
     return new Date(parts[2], parts[1] - 1, parts[0]);
   }
 
@@ -1841,7 +1847,7 @@ async function cargarDatosDesdeSheets() {
 function pintarClientes() {
   const sel = document.getElementById('sel-cliente');
   sel.innerHTML = '<option value="">— Elige un cliente —</option>';
-  CLIENTES.forEach(c => {
+  [...CLIENTES].sort((a, b) => (a.nombre || '').localeCompare(b.nombre || '', 'es')).forEach(c => {
     const o = document.createElement('option');
     o.value = c.id; o.textContent = c.nombre;
     sel.appendChild(o);
@@ -2805,7 +2811,7 @@ function iniciarFacSelector() {
   const sel = document.getElementById('fac-cliente');
   if (sel.options.length > 1) return; // ya poblado
   sel.innerHTML = '<option value="">— Selecciona un cliente —</option>';
-  CLIENTES.forEach(c => {
+  [...CLIENTES].sort((a, b) => (a.nombre || '').localeCompare(b.nombre || '', 'es')).forEach(c => {
     const o = document.createElement('option');
     o.value = c.id; o.textContent = c.nombre;
     sel.appendChild(o);
@@ -3024,7 +3030,7 @@ function pintarClientesEditor() {
 
   sel.innerHTML = '<option value="">— Crear cliente nuevo —</option>';
 
-  CLIENTES.forEach(c => {
+  [...CLIENTES].sort((a, b) => (a.nombre || '').localeCompare(b.nombre || '', 'es')).forEach(c => {
     const o = document.createElement('option');
     o.value = c.id;
     o.textContent = `${c.id} — ${c.nombre}`;
