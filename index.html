@@ -325,7 +325,6 @@ select:focus, input:focus{
 
 .btn-primary  { background:var(--primary); }
 .btn-secondary{ background:var(--green);   }
-.btn-calendar { background:var(--blue);    }
 .btn-sub      { background:var(--purple);  }
 .btn-sub-wa   { background:var(--green);   }
 .btn-gold     { background:var(--gold);    }
@@ -1369,19 +1368,9 @@ select:focus, input:focus{
     <p class="section-title" id="titulo-entrega">Entrega</p>
 
     <div id="seccion-unico">
-      <div class="fecha-row">
-        <div>
-          <label>Fecha de entrega</label>
-          <input type="date" id="fecha-entrega">
-        </div>
-        <div>
-          <label>Estado de pago</label>
-          <select id="estado-pago">
-            <option value="Pendiente">Pendiente</option>
-            <option value="Pagado">Pagado ✓</option>
-            <option value="Seña">Seña recibida</option>
-          </select>
-        </div>
+      <div>
+        <label>Fecha de entrega</label>
+        <input type="date" id="fecha-entrega">
       </div>
       <div style="margin-top:10px">
         <label>Notas</label>
@@ -1412,15 +1401,6 @@ select:focus, input:focus{
         + Agregar día de entrega
       </button>
 
-      <div style="margin-top:4px">
-        <label>Estado de pago</label>
-        <select id="sub-estado-pago">
-          <option value="Pendiente">Pendiente</option>
-          <option value="Pagado">Pagado ✓</option>
-          <option value="Seña">Seña recibida</option>
-        </select>
-      </div>
-
       <div style="margin-top:10px">
         <label>Notas</label>
         <input type="text" id="notas-sub" placeholder="Observaciones de la suscripción...">
@@ -1444,9 +1424,8 @@ select:focus, input:focus{
 
   <!-- ── BOTONES ───────────────────────────────── -->
   <div class="card">
-    <div class="btns" id="btns-unico">
+    <div class="btns" id="btns-unico" style="grid-template-columns:1fr 1fr">
       <button class="btn btn-secondary" id="btn-guardar" onclick="guardarEnSheets()" disabled>💾 Guardar</button>
-      <button class="btn btn-calendar"  id="btn-calendar" onclick="crearEventoCalendar()" disabled>📅 Calendar</button>
       <button class="btn btn-primary"   id="btn-whatsapp" onclick="generarWhatsApp()" disabled>💬 WhatsApp</button>
     </div>
 
@@ -1927,7 +1906,6 @@ function validarBtns() {
     const productosOk = PRODUCTOS.some(p => cantidades[p.id] > 0);
     const ok = clienteOk && productosOk;
     document.getElementById('btn-guardar').disabled  = !ok;
-    document.getElementById('btn-calendar').disabled = !ok;
     document.getElementById('btn-whatsapp').disabled = !ok;
   } else {
     const slotsOk = SLOTS.some(s => Object.values(s.cantidades).some(v => v > 0));
@@ -2135,7 +2113,7 @@ function construirPedido() {
   const cliId = document.getElementById('sel-cliente').value;
   const cli   = CLIENTES.find(c => c.id === cliId);
   const fecha = document.getElementById('fecha-entrega').value;
-  const pago  = document.getElementById('estado-pago').value;
+  const pago  = 'Pendiente';
   const notas = document.getElementById('notas-unico').value;
   const items = PRODUCTOS.filter(p => cantidades[p.id] > 0);
   let total   = 0;
@@ -2166,7 +2144,7 @@ function construirSuscripcion() {
   const cli    = CLIENTES.find(c => c.id === cliId);
   const mesAño = document.getElementById('sub-mes-año').value;
   const fechaIni = document.getElementById('sub-fecha-inicio').value;
-  const pago   = document.getElementById('sub-estado-pago').value;
+  const pago   = 'Pendiente';
   const notas  = document.getElementById('notas-sub').value;
 
   let totalMes = 0;
@@ -2226,8 +2204,24 @@ async function guardarEnSheets() {
   try {
     const data = await cargarJSONPConParams(armarParamsPedido(p, 'guardarPedido'));
     if (!data.ok) throw new Error(data.error || 'No se pudo guardar');
+
+    // Crear evento en Calendar automáticamente (sin valor)
+    try {
+      const calParams = new URLSearchParams({
+        accion:         'crearCalendar',
+        id_pedido:      p.idPedido,
+        nombre_cliente: p.cli.nombre,
+        telefono:       p.cli.telefono  || '',
+        direccion:      p.cli.direccion || '',
+        productos:      p.lineas.map(l => l.replace(/\s*\(\$[\d.,]+\)/g, '')).join(' | '),
+        fecha_entrega:  p.fecha,
+        notas:          p.notas || ''
+      });
+      await cargarJSONPConParams(calParams);
+    } catch (_) { /* Calendar falla silenciosamente */ }
+
     alertEl.className   = 'alert alert-ok show';
-    alertEl.textContent = '✅ Pedido ' + p.idPedido + ' guardado correctamente';
+    alertEl.textContent = '✅ Pedido ' + p.idPedido + ' guardado y agendado en Calendar';
     btn.innerHTML = '✓ Guardado';
     limpiarFormulario();
     setTimeout(() => { btn.innerHTML = '💾 Guardar'; btn.disabled = false; }, 3000);
@@ -2235,29 +2229,6 @@ async function guardarEnSheets() {
     alertEl.className   = 'alert alert-warn show';
     alertEl.textContent = '❌ ' + err.message;
     btn.innerHTML = '💾 Guardar';
-    btn.disabled  = false;
-  }
-}
-
-async function crearEventoCalendar() {
-  const p       = construirPedido();
-  const btn     = document.getElementById('btn-calendar');
-  const alertEl = document.getElementById('alert-save');
-
-  btn.innerHTML = '<span class="spinner"></span>Creando...';
-  btn.disabled  = true;
-
-  try {
-    const data = await cargarJSONPConParams(armarParamsPedido(p, 'crearCalendar'));
-    if (!data.ok) throw new Error(data.error);
-    alertEl.className   = 'alert alert-ok show';
-    alertEl.textContent = '✅ Evento creado en Google Calendar';
-    btn.innerHTML = '✓ Calendar';
-    setTimeout(() => { btn.innerHTML = '📅 Calendar'; btn.disabled = false; }, 3000);
-  } catch (err) {
-    alertEl.className   = 'alert alert-warn show';
-    alertEl.textContent = '❌ ' + err.message;
-    btn.innerHTML = '📅 Calendar';
     btn.disabled  = false;
   }
 }
@@ -2337,8 +2308,6 @@ function limpiarFormulario() {
   ponerFechaManana();
   ponerMesActual();
 
-  document.getElementById('estado-pago').value     = 'Pendiente';
-  document.getElementById('sub-estado-pago').value = 'Pendiente';
   document.getElementById('notas-unico').value     = '';
   document.getElementById('notas-sub').value       = '';
   document.getElementById('preview-recurrencia').classList.remove('show');
@@ -2365,12 +2334,11 @@ function generarWhatsApp() {
   const fechaFmt = p.fecha
     ? new Date(p.fecha + 'T12:00:00').toLocaleDateString('es-CO', { weekday:'long', day:'numeric', month:'long' })
     : 'por confirmar';
-  const pagoLabel = { Pendiente:'💳 Pago pendiente', Pagado:'✅ Pagado', Seña:'⚡ Seña recibida' }[p.pago];
   const lineasFmt = p.items.map(prod => {
     const precio = Number(prod.precio) || 0;
     return `  • ${cantidades[prod.id]}× ${prod.nombre} → $${(precio*cantidades[prod.id]).toLocaleString('es-CO')}`;
   }).join('\n');
-  let msg = `*PEDIDO ULAKU*\n━━━━━━━━━━━━━━━━━━\n👤 ${p.cli.nombre}\n📍 ${p.cli.direccion||''}\n📅 Entrega: ${fechaFmt}\n━━━━━━━━━━━━━━━━━━\n${lineasFmt}\n━━━━━━━━━━━━━━━━━━\n💰 *Total: $${p.total.toLocaleString('es-CO')}*\n${pagoLabel}`;
+  let msg = `*PEDIDO ULAKU*\n━━━━━━━━━━━━━━━━━━\n👤 ${p.cli.nombre}\n📍 ${p.cli.direccion||''}\n📅 Entrega: ${fechaFmt}\n━━━━━━━━━━━━━━━━━━\n${lineasFmt}\n━━━━━━━━━━━━━━━━━━\n💰 *Total: $${p.total.toLocaleString('es-CO')}*`;
   if (p.notas) msg += `\n📝 ${p.notas}`;
   mostrarPreview(msg);
 }
@@ -2388,7 +2356,6 @@ function generarWhatsAppSub() {
   const fechaIniStr = s.fechaIni
     ? new Date(s.fechaIni + 'T12:00:00').toLocaleDateString('es-CO', { day:'numeric', month:'long' })
     : 'desde el inicio del mes';
-  const pagoLabel = { Pendiente:'💳 Pago al cierre del mes', Pagado:'✅ Pagado', Seña:'⚡ Seña recibida' }[s.pago] || s.pago;
 
   const lineasSlots = s.slotsData.map(sl => {
     const prods = sl.detalle.map(i => `${i.cantidad}× ${i.producto}`).join(', ');
@@ -2406,8 +2373,7 @@ function generarWhatsAppSub() {
     `━━━━━━━━━━━━━━━━━━\n` +
     `*Plan de entregas:*\n${lineasSlots}\n` +
     `━━━━━━━━━━━━━━━━━━\n` +
-    `💰 *Total ${mesLabel}: $${s.totalMes.toLocaleString('es-CO')}*\n` +
-    `${pagoLabel}`;
+    `💰 *Total ${mesLabel}: $${s.totalMes.toLocaleString('es-CO')}*`;
 
   if (s.notas) msg += `\n📝 ${s.notas}`;
   msg += `\n━━━━━━━━━━━━━━━━━━\n_Puedes cancelar en cualquier momento._`;
@@ -2673,7 +2639,6 @@ async function renovarSuscripcion() {
     actualizarCliente();
     document.getElementById('sub-mes-año').value       = mesAñoNuevo;
     document.getElementById('sub-fecha-inicio').value  = anioSig + '-' + String(mesSig).padStart(2,'0') + '-01';
-    document.getElementById('sub-estado-pago').value   = data.info_cliente.estado_pago || 'Pendiente';
     document.getElementById('notas-sub').value         = data.info_cliente.notas || '';
 
     // Limpiar slots anteriores
