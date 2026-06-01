@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ulaku — ERP Inventario</title>
+<link rel="icon" href="./icono-ulaku.ico" type="image/x-icon">
+<meta name="theme-color" content="#c8521a">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap');
+:root{
+  --primary:#c8521a;--green:#2d6a4f;--blue:#3a6ea5;--purple:#6b46c1;--gold:#b8860b;
+  --bg:#F3E9DD;--card:#fff;--border:#e0d9cf;--soft:#faf8f4;--text:#1a1a1a;--muted:#7a7570;--danger:#c0392b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);padding:16px;font-size:14px;max-width:980px;margin:0 auto;}
+.brand-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.brand-left{display:flex;align-items:center;gap:16px;min-width:0;}
+.brand-logo{width:190px;height:auto;object-fit:contain;}
+.brand-title{font-family:'DM Serif Display',serif;font-size:30px;color:var(--primary);line-height:1;}
+.brand-sub{color:var(--muted);font-size:13px;margin-top:3px;}
+.link-back{font-size:12px;color:var(--muted);text-decoration:none;font-weight:700;padding:8px 11px;border:1px solid var(--border);border-radius:9px;background:var(--soft);white-space:nowrap;}
+.nav-tabs{display:grid;grid-template-columns:repeat(6,1fr);background:var(--soft);border:1px solid var(--border);border-radius:13px;padding:4px;gap:4px;margin-bottom:12px;}
+.nav-tab{padding:11px 8px;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:var(--muted);transition:all .2s;}
+.nav-tab.active{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(200,82,26,.25);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.section-title{font-size:15px;font-weight:800;margin-bottom:10px;}
+.section-sub{font-size:12px;color:var(--muted);line-height:1.5;margin-top:-4px;margin-bottom:10px;}
+label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+select,input,textarea{width:100%;border:1px solid var(--border);border-radius:9px;padding:12px;font-family:'DM Sans',sans-serif;font-size:15px;background:var(--soft);color:var(--text);outline:none;}
+textarea{min-height:80px;resize:vertical;}
+select:focus,input:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(200,82,26,.12);}
+.btn{padding:13px 15px;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:800;cursor:pointer;color:#fff;background:var(--primary);}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.btn-green{background:var(--green)}.btn-blue{background:var(--blue)}.btn-purple{background:var(--purple)}.btn-gold{background:var(--gold)}.btn-danger{background:var(--danger)}.btn-light{background:var(--soft);color:var(--text);border:1px solid var(--border);}
+.alert{border-radius:9px;padding:11px 12px;font-size:13px;margin-bottom:12px;display:none;line-height:1.5;}
+.alert.show{display:block}.alert-ok{background:#e9f5ef;border:1px solid #b7dfc9;color:var(--green)}.alert-warn{background:#fdecea;border:1px solid #f5c6c2;color:var(--danger)}.alert-info{background:#eef5fb;border:1px solid #c9dceb;color:var(--blue)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px;text-align:center;}
+.kpi-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;}
+.kpi-value{font-size:20px;font-weight:900;color:var(--primary);}
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:11px;background:#fff;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:#3d2b1a;color:#fff;text-align:left;padding:9px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+tr:last-child td{border-bottom:none}.num{text-align:right;white-space:nowrap}.center{text-align:center}.muted{color:var(--muted)}.ok{color:var(--green);font-weight:800}.bad{color:var(--danger);font-weight:800}.warn{color:var(--gold);font-weight:800}
+.badge{display:inline-block;border-radius:999px;padding:3px 8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;}
+.badge-ok{background:#e9f5ef;color:var(--green);border:1px solid #b7dfc9}.badge-bad{background:#fdecea;color:var(--danger);border:1px solid #f5c6c2}.badge-info{background:#eef5fb;color:var(--blue);border:1px solid #c9dceb}.badge-purple{background:#f3f0f9;color:var(--purple);border:1px solid #d6c9f0}
+.tab-view{display:none}.tab-view.active{display:block}.actions-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.mini{font-size:11px;color:var(--muted);line-height:1.5}.recipe-total{background:linear-gradient(135deg,var(--primary),#e06a2d);color:#fff;border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;margin-top:12px;}.recipe-total span:first-child{font-size:11px;text-transform:uppercase;letter-spacing:.08em;opacity:.85;font-weight:800}.recipe-total span:last-child{font-family:'DM Serif Display',serif;font-size:26px;}
+.lote-item{display:flex;justify-content:space-between;gap:8px;border:1px solid var(--border);background:var(--soft);border-radius:10px;padding:10px 12px;margin-bottom:7px;align-items:center;}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}.day-card{background:#fff;border:1px solid var(--border);border-radius:11px;min-height:170px;padding:10px;}.day-title{font-weight:900;color:var(--primary);font-size:13px;margin-bottom:3px;}.day-date{font-size:11px;color:var(--muted);margin-bottom:8px;}.prod-chip{background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:7px;margin-bottom:6px;font-size:12px;line-height:1.45;}.prod-chip strong{display:block}.purchase-item{border:1px solid var(--border);background:var(--soft);border-radius:10px;padding:10px;margin-bottom:8px;}.purchase-item-top{display:grid;grid-template-columns:1.4fr .7fr .7fr auto;gap:8px;align-items:end;}
+@media(max-width:850px){.nav-tabs{grid-template-columns:1fr 1fr}.brand-header{align-items:flex-start;flex-direction:column}.grid-2,.grid-3,.kpi-grid,.week-grid{grid-template-columns:1fr}.purchase-item-top{grid-template-columns:1fr}.brand-logo{width:170px}.brand-title{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="brand-header">
+  <div class="brand-left">
+    <img src="Ulaku H.png" alt="ulaku BREAD" class="brand-logo">
+    <div><div class="brand-title">ERP Inventario</div><div class="brand-sub">Recetas, producción, compras y stock</div></div>
+  </div>
+  <a class="link-back" href="index.html">← Volver a pedidos</a>
+</div>
+<div id="alerta" class="alert"></div>
+<div class="nav-tabs">
+  <button class="nav-tab active" id="nav-stock" onclick="setTab('stock')">📦 Stock</button>
+  <button class="nav-tab" id="nav-recetas" onclick="setTab('recetas')">🧮 Recetas</button>
+  <button class="nav-tab" id="nav-produccion" onclick="setTab('produccion')">🥖 Producción</button>
+  <button class="nav-tab" id="nav-calendario" onclick="setTab('calendario')">📅 Semana</button>
+  <button class="nav-tab" id="nav-compras" onclick="setTab('compras')">🛒 Compras</button>
+  <button class="nav-tab" id="nav-movimientos" onclick="setTab('movimientos')">📋 Movimientos</button>
+</div>
+
+<section id="tab-stock" class="tab-view active">
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Insumos</div><div class="kpi-value" id="kpi-insumos">0</div></div>
+    <div class="kpi"><div class="kpi-label">Recetas</div><div class="kpi-value" id="kpi-recetas">0</div></div>
+    <div class="kpi"><div class="kpi-label">Alertas stock</div><div class="kpi-value" id="kpi-alertas">0</div></div>
+    <div class="kpi"><div class="kpi-label">Valor inventario</div><div class="kpi-value" id="kpi-valor">$0</div></div>
+  </div>
+  <div class="card">
+    <div class="actions-row" style="justify-content:space-between;margin-bottom:10px;">
+      <div><p class="section-title" style="margin-bottom:2px;">Inventario actual</p><p class="section-sub" style="margin:0;">Stock disponible por insumo, unidad y costo unitario.</p></div>
+      <button class="btn btn-light" onclick="cargarTodo()">Actualizar</button>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Insumo</th><th>Unidad</th><th class="num">Stock</th><th class="num">Costo unitario</th><th class="num">Valor</th><th>Estado</th></tr></thead><tbody id="tbody-stock"><tr><td colspan="7">Cargando...</td></tr></tbody></table></div>
+  </div>
+</section>
+
+<section id="tab-recetas" class="tab-view">
+  <div class="card">
+    <p class="section-title">Calculadora de recetas</p>
+    <p class="section-sub">Simula cuántos insumos necesitas antes de registrar producción. Aquí todavía no se descuenta inventario.</p>
+    <div class="grid-3">
+      <div><label>Receta / producto</label><select id="sel-receta" onchange="calcularReceta()"></select></div>
+      <div><label>Cantidad a producir</label><input id="qty-receta" type="number" min="1" step="1" value="1" oninput="calcularReceta()"></div>
+      <div style="display:flex;align-items:end;"><button class="btn btn-purple" style="width:100%;" onclick="agregarLoteDesdeCalculadora()">Agregar a lote</button></div>
+    </div>
+  </div>
+  <div class="card">
+    <p class="section-title">Resultado de receta</p>
+    <div class="table-wrap"><table><thead><tr><th>Insumo</th><th>Unidad</th><th class="num">Por unidad</th><th class="num">Necesario</th><th class="num">Stock actual</th><th class="num">Stock final</th><th class="num">Costo estimado</th><th>Estado</th></tr></thead><tbody id="tbody-calculo"><tr><td colspan="8">Selecciona una receta.</td></tr></tbody></table></div>
+    <div class="recipe-total"><span>Costo estimado del lote</span><span id="total-receta">$0</span></div>
+  </div>
+</section>
+
+<section id="tab-produccion" class="tab-view">
+  <div class="grid-2">
+    <div class="card">
+      <p class="section-title">Lote de producción</p>
+      <p class="section-sub">Puedes registrar una o varias recetas en una misma producción.</p>
+      <div class="grid-2">
+        <div><label>Fecha producción</label><input id="fecha-produccion" type="date"></div>
+        <div><label>Estado</label><input value="Por registrar" disabled></div>
+      </div>
+      <div id="lote-lista" style="margin-top:12px;"><p class="mini">Todavía no hay productos en el lote.</p></div>
+      <div class="actions-row" style="margin-top:12px;">
+        <button class="btn btn-green" id="btn-registrar-prod" onclick="registrarProduccion()" disabled>Registrar producción y descontar</button>
+        <button class="btn btn-light" onclick="limpiarLote()">Limpiar</button>
+      </div>
+    </div>
+    <div class="card">
+      <p class="section-title">Impacto del lote</p>
+      <p class="section-sub">Consolidado de insumos necesarios para todo el lote.</p>
+      <div class="table-wrap"><table><thead><tr><th>Insumo</th><th class="num">Necesario</th><th class="num">Stock</th><th>Estado</th></tr></thead><tbody id="tbody-impacto"><tr><td colspan="4">Agrega recetas al lote.</td></tr></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<section id="tab-calendario" class="tab-view">
+  <div class="card">
+    <div class="actions-row" style="justify-content:space-between;">
+      <div><p class="section-title" style="margin-bottom:2px;">Calendario semanal de producción</p><p class="section-sub" style="margin:0;">Lee pedidos por fecha de entrega y agrupa qué se debe producir.</p></div>
+      <div class="actions-row"><input id="semana-inicio" type="date" style="width:165px;"><button class="btn btn-blue" onclick="cargarSemana()">Ver semana</button></div>
+    </div>
+  </div>
+  <div id="week-grid" class="week-grid"></div>
+</section>
+
+<section id="tab-compras" class="tab-view">
+  <div class="card">
+    <p class="section-title">Entrada de almacén por compra</p>
+    <p class="section-sub">Registra compras para aumentar inventario. Esto crea trazabilidad en movimientos.</p>
+    <div class="grid-3">
+      <div><label>Fecha entrada</label><input id="compra-fecha" type="date"></div>
+      <div><label>Proveedor</label><input id="compra-proveedor" type="text" placeholder="Proveedor"></div>
+      <div><label>Factura / soporte</label><input id="compra-factura" type="text" placeholder="Opcional"></div>
+    </div>
+    <div style="margin-top:12px;"><label>Notas</label><textarea id="compra-notas" placeholder="Observaciones de la compra"></textarea></div>
+  </div>
+  <div class="card">
+    <div class="actions-row" style="justify-content:space-between;margin-bottom:10px;"><p class="section-title" style="margin:0;">Insumos comprados</p><button class="btn btn-light" onclick="agregarItemCompra()">+ Agregar insumo</button></div>
+    <div id="items-compra"></div>
+    <button class="btn btn-gold" id="btn-registrar-compra" onclick="registrarEntradaAlmacen()">Registrar entrada de almacén</button>
+  </div>
+</section>
+
+<section id="tab-movimientos" class="tab-view">
+  <div class="card">
+    <div class="actions-row" style="justify-content:space-between;margin-bottom:10px;"><div><p class="section-title" style="margin-bottom:2px;">Movimientos de inventario</p><p class="section-sub" style="margin:0;">Entradas, salidas por producción y ajustes.</p></div><button class="btn btn-light" onclick="cargarMovimientos()">Actualizar</button></div>
+    <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Origen</th><th>Insumo</th><th class="num">Cantidad</th><th class="num">Antes</th><th class="num">Después</th><th>Notas</th></tr></thead><tbody id="tbody-movs"><tr><td colspan="8">Cargando...</td></tr></tbody></table></div>
+  </div>
+</section>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzOHqQskoePhBN0C_vxeYLE96bqbKAah-CCC1Dh0YFfk3G1VeOH2oSCnOpfOoS7w-Q_/exec';
+let INVENTARIO = [];
+let RECETAS = [];
+let HISTORIAL = [];
+let LOTE = [];
+let COMPRA_ID = 0;
+const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+
+document.addEventListener('DOMContentLoaded', () => {
+  setToday('fecha-produccion');
+  setToday('compra-fecha');
+  document.getElementById('semana-inicio').value = isoDate(getMonday(new Date()));
+  cargarTodo();
+});
+
+function setTab(tab){
+  document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab).classList.add('active');
+  if(tab === 'calendario') cargarSemana();
+  if(tab === 'movimientos') cargarMovimientos();
+}
+function alerta(tipo,msg){const el=document.getElementById('alerta');el.className='alert show alert-' + tipo;el.innerHTML=msg;setTimeout(()=>{el.classList.remove('show')},7000)}
+function pesos(n){return '$' + (Number(n)||0).toLocaleString('es-CO',{maximumFractionDigits:0})}
+function num(n,d=2){return (Number(n)||0).toLocaleString('es-CO',{maximumFractionDigits:d})}
+function isoDate(d){return d.toISOString().slice(0,10)}
+function setToday(id){document.getElementById(id).value=isoDate(new Date())}
+function getMonday(d){const x=new Date(d);const day=x.getDay();const diff=x.getDate()-day+(day===0?-6:1);x.setDate(diff);x.setHours(0,0,0,0);return x}
+function parseLocalDate(s){const [a,m,d]=String(s).split('-').map(Number);return new Date(a,m-1,d)}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
+
+function jsonp(params){
+  return new Promise((resolve,reject)=>{
+    const cb='jsonp_'+Date.now()+'_'+Math.floor(Math.random()*100000);
+    const qs = params instanceof URLSearchParams ? params : new URLSearchParams(params);
+    qs.set('callback',cb);
+    const script=document.createElement('script');
+    window[cb]=(data)=>{delete window[cb];script.remove();resolve(data)};
+    script.onerror=()=>{delete window[cb];script.remove();reject(new Error('No se pudo conectar con Apps Script'))};
+    script.src=SCRIPT_URL+'?'+qs.toString();
+    document.body.appendChild(script);
+  });
+}
+
+async function cargarTodo(){
+  try{
+    const data = await jsonp({accion:'getInventarioCompleto'});
+    if(!data.ok) throw new Error(data.error || 'No fue posible cargar inventario');
+    INVENTARIO = data.inventario || [];
+    RECETAS = data.recetas || [];
+    HISTORIAL = data.historial || [];
+    pintarStock();
+    pintarSelectorRecetas();
+    calcularReceta();
+    pintarImpactoLote();
+    cargarMovimientos(false);
+    alerta('ok','✅ Inventario cargado correctamente.');
+  }catch(err){
+    alerta('warn','❌ Error cargando inventario: '+err.message);
+  }
+}
+
+function stockById(){const m={};INVENTARIO.forEach(i=>m[i.id]=i);return m}
+function recetaById(id){return RECETAS.find(r=>r.id===id)}
+function pintarStock(){
+  const tbody=document.getElementById('tbody-stock');
+  const alertas = INVENTARIO.filter(i => Number(i.stock || 0) <= Number(i.nivel_minimo || 0) && String(i.nivel_minimo||'').trim() !== '');
+  const valor = INVENTARIO.reduce((s,i)=>s+(Number(i.stock)||0)*(Number(i.precio_unitario)||0),0);
+  document.getElementById('kpi-insumos').textContent = INVENTARIO.length;
+  document.getElementById('kpi-recetas').textContent = RECETAS.length;
+  document.getElementById('kpi-alertas').textContent = alertas.length;
+  document.getElementById('kpi-valor').textContent = pesos(valor);
+  if(!INVENTARIO.length){tbody.innerHTML='<tr><td colspan="7">No hay insumos cargados.</td></tr>';return;}
+  tbody.innerHTML = INVENTARIO.map(i=>{
+    const stock=Number(i.stock)||0, min=Number(i.nivel_minimo)||0, pu=Number(i.precio_unitario)||0;
+    const tieneMin=String(i.nivel_minimo||'').trim()!=='';
+    const estado = tieneMin && stock <= min ? '<span class="badge badge-bad">Bajo</span>' : '<span class="badge badge-ok">OK</span>';
+    return `<tr><td>${i.id}</td><td><strong>${i.nombre||''}</strong></td><td>${i.unidad||''}</td><td class="num">${num(stock)}</td><td class="num">${pesos(pu)}</td><td class="num">${pesos(stock*pu)}</td><td>${estado}</td></tr>`;
+  }).join('');
+}
+
+function pintarSelectorRecetas(){
+  const sel=document.getElementById('sel-receta');
+  sel.innerHTML = RECETAS.map(r=>`<option value="${r.id}">${r.id} — ${r.nombre}</option>`).join('');
+}
+
+function calcularReceta(){
+  const recId=document.getElementById('sel-receta').value;
+  const qty=Number(document.getElementById('qty-receta').value)||0;
+  const receta=recetaById(recId);
+  const tbody=document.getElementById('tbody-calculo');
+  const sMap=stockById();
+  if(!receta || qty<=0){tbody.innerHTML='<tr><td colspan="8">Selecciona una receta y cantidad.</td></tr>';document.getElementById('total-receta').textContent=pesos(0);return;}
+  let total=0;
+  tbody.innerHTML = receta.ingredientes.map(ing=>{
+    const st=sMap[ing.id] || {};
+    const requerido=(Number(ing.cantidad_unitaria)||0)*qty;
+    const stock=Number(st.stock)||0;
+    const final=stock-requerido;
+    const costo=requerido*(Number(st.precio_unitario)||0);
+    total+=costo;
+    const estado = !ing.descuentable ? '<span class="badge badge-info">No descuenta</span>' : final < 0 ? '<span class="badge badge-bad">Falta</span>' : '<span class="badge badge-ok">OK</span>';
+    return `<tr><td><strong>${ing.nombre}</strong><br><span class="mini">${ing.id}</span></td><td>${ing.unidad||st.unidad||''}</td><td class="num">${num(ing.cantidad_unitaria)}</td><td class="num">${num(requerido)}</td><td class="num">${num(stock)}</td><td class="num ${final<0?'bad':'ok'}">${num(final)}</td><td class="num">${pesos(costo)}</td><td>${estado}</td></tr>`;
+  }).join('');
+  document.getElementById('total-receta').textContent=pesos(total);
+}
+
+function agregarLoteDesdeCalculadora(){
+  const recId=document.getElementById('sel-receta').value;
+  const qty=Number(document.getElementById('qty-receta').value)||0;
+  const receta=recetaById(recId);
+  if(!receta || qty<=0){alerta('warn','Debes seleccionar una receta y una cantidad mayor a cero.');return;}
+  LOTE.push({id:receta.id,nombre:receta.nombre,qty});
+  pintarLote();
+  pintarImpactoLote();
+  setTab('produccion');
+}
+function pintarLote(){
+  const div=document.getElementById('lote-lista');
+  document.getElementById('btn-registrar-prod').disabled = LOTE.length===0;
+  if(!LOTE.length){div.innerHTML='<p class="mini">Todavía no hay productos en el lote.</p>';return;}
+  div.innerHTML = LOTE.map((l,i)=>`<div class="lote-item"><div><strong>${l.nombre}</strong><br><span class="mini">${l.id} · ${num(l.qty,0)} unidad(es)</span></div><button class="btn btn-danger" style="padding:8px 10px;" onclick="quitarLote(${i})">Quitar</button></div>`).join('');
+}
+function quitarLote(i){LOTE.splice(i,1);pintarLote();pintarImpactoLote()}
+function limpiarLote(){LOTE=[];pintarLote();pintarImpactoLote()}
+function pintarImpactoLote(){
+  const tbody=document.getElementById('tbody-impacto');
+  const sMap=stockById();
+  const req={};
+  LOTE.forEach(l=>{
+    const r=recetaById(l.id); if(!r) return;
+    r.ingredientes.forEach(ing=>{if(!ing.descuentable) return; req[ing.id]=(req[ing.id]||0)+(Number(ing.cantidad_unitaria)||0)*(Number(l.qty)||0);});
+  });
+  const ids=Object.keys(req);
+  if(!ids.length){tbody.innerHTML='<tr><td colspan="4">Agrega recetas al lote.</td></tr>';return;}
+  tbody.innerHTML = ids.map(id=>{
+    const st=sMap[id]||{}; const stock=Number(st.stock)||0; const final=stock-req[id];
+    return `<tr><td><strong>${st.nombre||id}</strong><br><span class="mini">${id}</span></td><td class="num">${num(req[id])} ${st.unidad||''}</td><td class="num">${num(stock)}</td><td>${final<0?'<span class="badge badge-bad">Falta '+num(Math.abs(final))+'</span>':'<span class="badge badge-ok">OK</span>'}</td></tr>`;
+  }).join('');
+}
+async function registrarProduccion(){
+  if(!LOTE.length) return;
+  if(!confirm('¿Registrar producción y descontar inventario?')) return;
+  const btn=document.getElementById('btn-registrar-prod'); btn.disabled=true; btn.textContent='Registrando...';
+  try{
+    const params=new URLSearchParams({accion:'registrarProduccion',fecha:document.getElementById('fecha-produccion').value,lotes:JSON.stringify(LOTE)});
+    const res=await jsonp(params);
+    if(!res.ok) throw new Error(res.error || 'No se pudo registrar producción');
+    alerta('ok','✅ '+(res.mensaje||'Producción registrada')+(res.alertas&&res.alertas.length?'<br>⚠️ '+res.alertas.join('<br>'):''));
+    limpiarLote();
+    await cargarTodo();
+  }catch(err){alerta('warn','❌ '+err.message)}
+  finally{btn.textContent='Registrar producción y descontar';btn.disabled=LOTE.length===0;}
+}
+
+async function cargarSemana(){
+  const cont=document.getElementById('week-grid');
+  const inicio=document.getElementById('semana-inicio').value || isoDate(getMonday(new Date()));
+  cont.innerHTML='<div class="card">Cargando semana...</div>';
+  try{
+    const res=await jsonp({accion:'getCalendarioProduccion',fecha_inicio:inicio});
+    if(!res.ok) throw new Error(res.error || 'No se pudo cargar calendario');
+    const dias=res.dias || [];
+    cont.innerHTML = dias.map(d=>`<div class="day-card"><div class="day-title">${d.dia_nombre||''}</div><div class="day-date">${d.fecha||''}</div>${(d.productos||[]).length ? d.productos.map(p=>`<div class="prod-chip"><strong>${p.producto}</strong>${num(p.cantidad,0)} unidad(es)<br><span class="mini">${p.pedidos||0} pedido(s)</span></div>`).join('') : '<p class="mini">Sin producción programada.</p>'}</div>`).join('');
+  }catch(err){
+    const start=parseLocalDate(inicio);
+    cont.innerHTML = Array.from({length:7},(_,i)=>{const d=addDays(start,i);return `<div class="day-card"><div class="day-title">${DIAS[d.getDay()]}</div><div class="day-date">${isoDate(d)}</div><p class="mini">Activa la función <strong>getCalendarioProduccion</strong> en Apps Script para ver pedidos reales.</p></div>`}).join('');
+    alerta('info','ℹ️ Para activar calendario real pega el parche de Apps Script que te dejé en el archivo adicional.');
+  }
+}
+
+function agregarItemCompra(){
+  COMPRA_ID++;
+  const div=document.getElementById('items-compra');
+  const wrap=document.createElement('div');
+  wrap.className='purchase-item';
+  wrap.id='compra-item-'+COMPRA_ID;
+  wrap.innerHTML=`<div class="purchase-item-top"><div><label>Insumo</label><select class="compra-insumo">${INVENTARIO.map(i=>`<option value="${i.id}">${i.id} — ${i.nombre} (${i.unidad||''})</option>`).join('')}</select></div><div><label>Cantidad</label><input class="compra-cantidad" type="number" min="0" step="0.01" value="0"></div><div><label>Costo total</label><input class="compra-costo" type="number" min="0" step="1" value="0"></div><button class="btn btn-danger" onclick="document.getElementById('compra-item-${COMPRA_ID}').remove()">Quitar</button></div>`;
+  div.appendChild(wrap);
+}
+async function registrarEntradaAlmacen(){
+  const items=[...document.querySelectorAll('.purchase-item')].map(row=>{
+    const id=row.querySelector('.compra-insumo').value;
+    const ins=INVENTARIO.find(i=>i.id===id)||{};
+    const cantidad=Number(row.querySelector('.compra-cantidad').value)||0;
+    const costo_total=Number(row.querySelector('.compra-costo').value)||0;
+    return {id,nombre:ins.nombre||'',unidad:ins.unidad||'',cantidad,costo_total,costo_unitario:cantidad>0?costo_total/cantidad:0};
+  }).filter(i=>i.id && i.cantidad>0);
+  if(!items.length){alerta('warn','Agrega al menos un insumo con cantidad mayor a cero.');return;}
+  const params=new URLSearchParams({accion:'registrarEntradaAlmacen',fecha:document.getElementById('compra-fecha').value,proveedor:document.getElementById('compra-proveedor').value,factura:document.getElementById('compra-factura').value,notas:document.getElementById('compra-notas').value,items:JSON.stringify(items)});
+  try{
+    const res=await jsonp(params);
+    if(!res.ok) throw new Error(res.error || 'No se pudo registrar entrada');
+    alerta('ok','✅ '+(res.mensaje||'Entrada registrada'));
+    document.getElementById('items-compra').innerHTML=''; agregarItemCompra(); await cargarTodo();
+  }catch(err){alerta('warn','❌ '+err.message+'<br><span class="mini">Si es la primera vez, pega el parche Apps Script para compras.</span>')}
+}
+
+async function cargarMovimientos(showAlert=true){
+  const tbody=document.getElementById('tbody-movs');
+  try{
+    const res=await jsonp({accion:'getMovimientosInventario',limite:'150'});
+    if(!res.ok) throw new Error(res.error || 'No hay movimientos');
+    const rows=res.data || [];
+    if(!rows.length){tbody.innerHTML='<tr><td colspan="8">Sin movimientos registrados.</td></tr>';return;}
+    tbody.innerHTML=rows.map(m=>`<tr><td>${m.fecha||''}</td><td><span class="badge ${String(m.tipo).toLowerCase().includes('entrada')?'badge-ok':'badge-purple'}">${m.tipo||''}</span></td><td>${m.origen||''}</td><td><strong>${m.insumo||m.insumo_id||''}</strong><br><span class="mini">${m.insumo_id||''}</span></td><td class="num">${num(m.cantidad)}</td><td class="num">${num(m.stock_antes)}</td><td class="num">${num(m.stock_despues)}</td><td>${m.notas||''}</td></tr>`).join('');
+  }catch(err){
+    tbody.innerHTML = (HISTORIAL||[]).length ? HISTORIAL.slice(-50).reverse().map(h=>`<tr><td>${h.fecha||''}</td><td><span class="badge badge-purple">Producción</span></td><td>Historial</td><td>${h.nombre||h.id}</td><td class="num">${num(h.qty)}</td><td class="num">—</td><td class="num">—</td><td>Historial básico</td></tr>`).join('') : '<tr><td colspan="8">Activa BD_MOV_INVENTARIO con el parche de Apps Script.</td></tr>';
+    if(showAlert) alerta('info','ℹ️ Para movimientos completos pega el parche Apps Script. Mientras tanto se muestra historial básico de producción.');
+  }
+}
+</script>
+</body>
+</html>

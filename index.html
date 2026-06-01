@@ -187,6 +187,7 @@ label{
 select,
 input[type=text],
 input[type=date],
+input[type=email],
 input[type=number]{
   width:100%;
   border:1px solid var(--border);
@@ -1327,6 +1328,7 @@ select:focus, input:focus{
   <button class="nav-tab tab-factura" id="nav-factura" onclick="setTab('factura')">🧾 Factura</button>
   <button class="nav-tab" id="nav-clientes" onclick="setTab('clientes')">👤 Clientes</button>
 </div>
+<div style="text-align:right;margin-bottom:10px;"><a href="inventario.html" style="font-size:12px;color:var(--muted);text-decoration:none;font-weight:600;padding:5px 10px;border:1px solid var(--border);border-radius:7px;background:var(--soft);">📦 Inventario →</a></div>
 
 <!-- ═══════════════════════════════════════════════
      TAB: PEDIDOS + SUSCRIPCIONES (formulario)
@@ -1354,6 +1356,8 @@ select:focus, input:focus{
     <div class="info-cli" id="info-cliente">
       <div id="cli-dir"></div>
       <div id="cli-tel"></div>
+      <div id="cli-mail"></div>
+      <div id="cli-cumple"></div>
     </div>
   </div>
 
@@ -1468,6 +1472,35 @@ select:focus, input:focus{
     <div style="margin-top:10px">
       <label>Teléfono</label>
       <input type="text" id="cli-telefono" placeholder="Número de WhatsApp">
+    </div>
+
+    <div style="margin-top:10px">
+      <label>Correo electrónico</label>
+      <input type="email" id="cli-correo" placeholder="correo@ejemplo.com">
+    </div>
+
+    <div style="margin-top:10px">
+      <label>Fecha de cumpleaños <span style="font-size:11px;color:#777">(sin año)</span></label>
+      <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:8px">
+        <select id="cli-cumple-dia">
+          <option value="">Día</option>
+        </select>
+        <select id="cli-cumple-mes">
+          <option value="">Mes</option>
+          <option value="01">Enero</option>
+          <option value="02">Febrero</option>
+          <option value="03">Marzo</option>
+          <option value="04">Abril</option>
+          <option value="05">Mayo</option>
+          <option value="06">Junio</option>
+          <option value="07">Julio</option>
+          <option value="08">Agosto</option>
+          <option value="09">Septiembre</option>
+          <option value="10">Octubre</option>
+          <option value="11">Noviembre</option>
+          <option value="12">Diciembre</option>
+        </select>
+      </div>
     </div>
 
     <div class="btns" style="grid-template-columns:1fr 1fr;margin-top:14px">
@@ -1863,6 +1896,8 @@ function actualizarCliente() {
   if (cli) {
     document.getElementById('cli-dir').textContent = '📍 ' + (cli.direccion || '');
     document.getElementById('cli-tel').textContent = '📱 ' + (cli.telefono  || '');
+    document.getElementById('cli-mail').textContent = cli.correo ? '✉️ ' + cli.correo : '';
+    document.getElementById('cli-cumple').textContent = cli.fecha_cumpleanos ? '🎂 ' + formatearCumple(cli.fecha_cumpleanos) : '';
     info.style.display = 'block';
   } else {
     info.style.display = 'none';
@@ -2220,11 +2255,20 @@ async function guardarEnSheets() {
       await cargarJSONPConParams(calParams);
     } catch (_) { /* Calendar falla silenciosamente */ }
 
-    alertEl.className   = 'alert alert-ok show';
-    alertEl.textContent = '✅ Pedido ' + p.idPedido + ' guardado y agendado en Calendar';
+    // Alertas de inventario (si el GAS reportó stock insuficiente)
+    const alertasInv = data.alertas_inventario || [];
+    if (alertasInv.length) {
+      alertEl.className = 'alert alert-warn show';
+      alertEl.innerHTML = '✅ Pedido ' + p.idPedido + ' guardado — ⚠️ Inventario:<br>'
+        + alertasInv.map(a => '• ' + a).join('<br>');
+    } else {
+      alertEl.className   = 'alert alert-ok show';
+      alertEl.textContent = '✅ Pedido ' + p.idPedido + ' guardado · Inventario descontado · Agendado en Calendar';
+    }
+
     btn.innerHTML = '✓ Guardado';
     limpiarFormulario();
-    setTimeout(() => { btn.innerHTML = '💾 Guardar'; btn.disabled = false; }, 3000);
+    setTimeout(() => { btn.innerHTML = '💾 Guardar'; btn.disabled = false; }, 4000);
   } catch (err) {
     alertEl.className   = 'alert alert-warn show';
     alertEl.textContent = '❌ ' + err.message;
@@ -2439,7 +2483,7 @@ async function cargarCartera() {
         </div>
         <div class="cli-card-meta">
           ${c.pedidos_pendientes} pedido${c.pedidos_pendientes !== 1 ? 's' : ''} pendiente${c.pedidos_pendientes !== 1 ? 's' : ''}
-          &nbsp;·&nbsp; Último: ${(()=>{ const f=parseFechaHTML(c.ultimo_pedido); return f?f.toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',year:'numeric'}):'—'; })()}
+          &nbsp;·&nbsp; Último: ${c.ultimo_pedido || '—'}
         </div>
         <div class="cli-card-bar-bg">
           <div class="cli-card-bar" style="width:${pct.toFixed(1)}%"></div>
@@ -2989,7 +3033,45 @@ function copiarFacturaWA() {
 function imprimirFactura() {
   window.print();
 }
+
+function inicializarSelectCumpleanos() {
+  const selDia = document.getElementById('cli-cumple-dia');
+  if (!selDia || selDia.dataset.ready === '1') return;
+  for (let d = 1; d <= 31; d++) {
+    const v = String(d).padStart(2, '0');
+    const o = document.createElement('option');
+    o.value = v;
+    o.textContent = d;
+    selDia.appendChild(o);
+  }
+  selDia.dataset.ready = '1';
+}
+
+function obtenerCumpleanosCliente() {
+  const dia = document.getElementById('cli-cumple-dia')?.value || '';
+  const mes = document.getElementById('cli-cumple-mes')?.value || '';
+  if (!dia && !mes) return '';
+  if (!dia || !mes) return null;
+  return `${dia}/${mes}`;
+}
+
+function setCumpleanosCliente(valor) {
+  inicializarSelectCumpleanos();
+  const limpio = String(valor || '').trim();
+  const m = limpio.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
+  document.getElementById('cli-cumple-dia').value = m ? String(Number(m[1])).padStart(2, '0') : '';
+  document.getElementById('cli-cumple-mes').value = m ? String(Number(m[2])).padStart(2, '0') : '';
+}
+
+function formatearCumple(valor) {
+  const meses = ['', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const m = String(valor || '').trim().match(/^(\d{1,2})[\/\-](\d{1,2})$/);
+  if (!m) return valor || '';
+  return `${Number(m[1])} de ${meses[Number(m[2])] || ''}`.trim();
+}
+
 function pintarClientesEditor() {
+  inicializarSelectCumpleanos();
   const sel = document.getElementById('cliente-edit-select');
   if (!sel) return;
 
@@ -3019,6 +3101,8 @@ function cargarClienteParaEditar() {
   document.getElementById('cli-nombre').value = c.nombre || '';
   document.getElementById('cli-direccion').value = c.direccion || '';
   document.getElementById('cli-telefono').value = c.telefono || '';
+  document.getElementById('cli-correo').value = c.correo || c.email || '';
+  setCumpleanosCliente(c.fecha_cumpleanos || c.cumpleanos || c.cumpleaños || '');
 }
 
 function limpiarFormularioCliente() {
@@ -3036,6 +3120,8 @@ function limpiarFormularioCliente() {
   document.getElementById('cli-nombre').value = '';
   document.getElementById('cli-direccion').value = '';
   document.getElementById('cli-telefono').value = '';
+  document.getElementById('cli-correo').value = '';
+  setCumpleanosCliente('');
 }
 
 async function guardarCliente() {
@@ -3045,10 +3131,24 @@ async function guardarCliente() {
   const nombre = document.getElementById('cli-nombre').value.trim();
   const direccion = document.getElementById('cli-direccion').value.trim();
   const telefono = document.getElementById('cli-telefono').value.trim();
+  const correo = document.getElementById('cli-correo').value.trim();
+  const fecha_cumpleanos = obtenerCumpleanosCliente();
 
   if (!id || !nombre) {
     alertEl.className = 'alert alert-warn show';
     alertEl.textContent = '❌ Debes ingresar ID y nombre del cliente';
+    return;
+  }
+
+  if (fecha_cumpleanos === null) {
+    alertEl.className = 'alert alert-warn show';
+    alertEl.textContent = '❌ Para el cumpleaños debes seleccionar día y mes';
+    return;
+  }
+
+  if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+    alertEl.className = 'alert alert-warn show';
+    alertEl.textContent = '❌ Ingresa un correo electrónico válido';
     return;
   }
 
@@ -3057,7 +3157,9 @@ async function guardarCliente() {
     id,
     nombre,
     direccion,
-    telefono
+    telefono,
+    correo,
+    fecha_cumpleanos
   });
 
   try {
