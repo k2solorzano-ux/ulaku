@@ -3,377 +3,913 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ulaku — ERP Inventario</title>
+<title>ulaku — Recetas, semana y producción</title>
 <link rel="icon" href="./icono-ulaku.ico" type="image/x-icon">
 <meta name="theme-color" content="#c8521a">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700;800&display=swap');
+
 :root{
-  --primary:#c8521a;--green:#2d6a4f;--blue:#3a6ea5;--purple:#6b46c1;--gold:#b8860b;
-  --bg:#F3E9DD;--card:#fff;--border:#e0d9cf;--soft:#faf8f4;--text:#1a1a1a;--muted:#7a7570;--danger:#c0392b;
+  --primary:#c8521a;
+  --green:#2d6a4f;
+  --blue:#3a6ea5;
+  --purple:#6b46c1;
+  --red:#c0392b;
+  --gold:#b8860b;
+  --bg:#F3E9DD;
+  --card:#fff;
+  --border:#e0d9cf;
+  --soft:#faf8f4;
+  --text:#1a1a1a;
+  --muted:#6f6a65;
+  --shadow:0 2px 8px rgba(0,0,0,.06);
 }
+
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);padding:16px;font-size:14px;max-width:980px;margin:0 auto;}
-.brand-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
-.brand-left{display:flex;align-items:center;gap:16px;min-width:0;}
-.brand-logo{width:190px;height:auto;object-fit:contain;}
-.brand-title{font-family:'DM Serif Display',serif;font-size:30px;color:var(--primary);line-height:1;}
-.brand-sub{color:var(--muted);font-size:13px;margin-top:3px;}
-.link-back{font-size:12px;color:var(--muted);text-decoration:none;font-weight:700;padding:8px 11px;border:1px solid var(--border);border-radius:9px;background:var(--soft);white-space:nowrap;}
-.nav-tabs{display:grid;grid-template-columns:repeat(6,1fr);background:var(--soft);border:1px solid var(--border);border-radius:13px;padding:4px;gap:4px;margin-bottom:12px;}
-.nav-tab{padding:11px 8px;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:var(--muted);transition:all .2s;}
-.nav-tab.active{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(200,82,26,.25);}
-.card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-.section-title{font-size:15px;font-weight:800;margin-bottom:10px;}
-.section-sub{font-size:12px;color:var(--muted);line-height:1.5;margin-top:-4px;margin-bottom:10px;}
-label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
-select,input,textarea{width:100%;border:1px solid var(--border);border-radius:9px;padding:12px;font-family:'DM Sans',sans-serif;font-size:15px;background:var(--soft);color:var(--text);outline:none;}
-textarea{min-height:80px;resize:vertical;}
-select:focus,input:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(200,82,26,.12);}
-.btn{padding:13px 15px;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:800;cursor:pointer;color:#fff;background:var(--primary);}
-.btn:disabled{opacity:.45;cursor:not-allowed;}
-.btn-green{background:var(--green)}.btn-blue{background:var(--blue)}.btn-purple{background:var(--purple)}.btn-gold{background:var(--gold)}.btn-danger{background:var(--danger)}.btn-light{background:var(--soft);color:var(--text);border:1px solid var(--border);}
-.alert{border-radius:9px;padding:11px 12px;font-size:13px;margin-bottom:12px;display:none;line-height:1.5;}
-.alert.show{display:block}.alert-ok{background:#e9f5ef;border:1px solid #b7dfc9;color:var(--green)}.alert-warn{background:#fdecea;border:1px solid #f5c6c2;color:var(--danger)}.alert-info{background:#eef5fb;border:1px solid #c9dceb;color:var(--blue)}
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
-.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px;text-align:center;}
-.kpi-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;}
-.kpi-value{font-size:20px;font-weight:900;color:var(--primary);}
-.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:11px;background:#fff;}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th{background:#3d2b1a;color:#fff;text-align:left;padding:9px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
-td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
-tr:last-child td{border-bottom:none}.num{text-align:right;white-space:nowrap}.center{text-align:center}.muted{color:var(--muted)}.ok{color:var(--green);font-weight:800}.bad{color:var(--danger);font-weight:800}.warn{color:var(--gold);font-weight:800}
-.badge{display:inline-block;border-radius:999px;padding:3px 8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;}
-.badge-ok{background:#e9f5ef;color:var(--green);border:1px solid #b7dfc9}.badge-bad{background:#fdecea;color:var(--danger);border:1px solid #f5c6c2}.badge-info{background:#eef5fb;color:var(--blue);border:1px solid #c9dceb}.badge-purple{background:#f3f0f9;color:var(--purple);border:1px solid #d6c9f0}
-.tab-view{display:none}.tab-view.active{display:block}.actions-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.mini{font-size:11px;color:var(--muted);line-height:1.5}.recipe-total{background:linear-gradient(135deg,var(--primary),#e06a2d);color:#fff;border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;margin-top:12px;}.recipe-total span:first-child{font-size:11px;text-transform:uppercase;letter-spacing:.08em;opacity:.85;font-weight:800}.recipe-total span:last-child{font-family:'DM Serif Display',serif;font-size:26px;}
-.lote-item{display:flex;justify-content:space-between;gap:8px;border:1px solid var(--border);background:var(--soft);border-radius:10px;padding:10px 12px;margin-bottom:7px;align-items:center;}
-.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}.day-card{background:#fff;border:1px solid var(--border);border-radius:11px;min-height:170px;padding:10px;}.day-title{font-weight:900;color:var(--primary);font-size:13px;margin-bottom:3px;}.day-date{font-size:11px;color:var(--muted);margin-bottom:8px;}.prod-chip{background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:7px;margin-bottom:6px;font-size:12px;line-height:1.45;}.prod-chip strong{display:block}.purchase-item{border:1px solid var(--border);background:var(--soft);border-radius:10px;padding:10px;margin-bottom:8px;}.purchase-item-top{display:grid;grid-template-columns:1.4fr .7fr .7fr auto;gap:8px;align-items:end;}
-@media(max-width:850px){.nav-tabs{grid-template-columns:1fr 1fr}.brand-header{align-items:flex-start;flex-direction:column}.grid-2,.grid-3,.kpi-grid,.week-grid{grid-template-columns:1fr}.purchase-item-top{grid-template-columns:1fr}.brand-logo{width:170px}.brand-title{font-size:26px}}
+
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding:20px 24px 40px;
+  max-width:1500px;
+  margin:0 auto;
+  font-size:15px;
+}
+
+.header{
+  display:grid;
+  grid-template-columns:280px 1fr auto;
+  gap:24px;
+  align-items:center;
+  margin-bottom:22px;
+}
+
+.logo{width:220px;max-width:100%;height:auto;object-fit:contain}
+
+h1{
+  font-family:'DM Serif Display',serif;
+  color:var(--primary);
+  font-size:44px;
+  line-height:1;
+  margin-bottom:4px;
+}
+
+.subtitle{font-size:20px;color:var(--muted)}
+
+.back-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  color:var(--muted);
+  background:var(--soft);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px 18px;
+  font-weight:800;
+  font-size:16px;
+  box-shadow:var(--shadow);
+}
+
+.tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  background:var(--soft);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:6px;
+  gap:6px;
+  margin-bottom:18px;
+  box-shadow:var(--shadow);
+}
+
+.tab-btn{
+  border:none;
+  background:transparent;
+  color:var(--muted);
+  border-radius:13px;
+  padding:17px 10px;
+  font-family:'DM Sans',sans-serif;
+  font-weight:800;
+  font-size:18px;
+  cursor:pointer;
+}
+
+.tab-btn.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(200,82,26,.25)}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:24px;
+  margin-bottom:18px;
+  box-shadow:var(--shadow);
+}
+
+.card-title{font-size:22px;font-weight:800;margin-bottom:6px}
+.card-subtitle{color:var(--muted);font-size:16px;line-height:1.5}
+
+.view{display:none}
+.view.active{display:block}
+
+.toolbar{
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  gap:12px;
+  align-items:end;
+}
+
+label{
+  display:block;
+  font-size:12px;
+  font-weight:800;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  margin-bottom:5px;
+}
+
+input,select,textarea{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:13px 14px;
+  background:var(--soft);
+  color:var(--text);
+  outline:none;
+  font-family:'DM Sans',sans-serif;
+  font-size:16px;
+}
+
+textarea{min-height:90px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(200,82,26,.12)}
+
+.btn{
+  border:none;
+  border-radius:13px;
+  padding:14px 18px;
+  min-height:48px;
+  color:#fff;
+  font-family:'DM Sans',sans-serif;
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+  background:var(--primary);
+  white-space:nowrap;
+}
+
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-blue{background:var(--blue)}
+.btn-green{background:var(--green)}
+.btn-purple{background:var(--purple)}
+.btn-gold{background:var(--gold)}
+
+.alert{display:none;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:14px;line-height:1.45}
+.alert.show{display:block}
+.alert-ok{background:#e9f5ef;border:1px solid #b7dfc9;color:var(--green)}
+.alert-warn{background:#fdecea;border:1px solid #f5c6c2;color:var(--red)}
+.alert-info{background:#eef5fc;border:1px solid #c4d8ed;color:var(--blue)}
+
+.badge{
+  display:inline-block;
+  border-radius:20px;
+  padding:3px 9px;
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.badge-blue{background:#eef5fc;color:var(--blue);border:1px solid #c4d8ed}
+.badge-purple{background:#f3f0f9;color:var(--purple);border:1px solid #d6c9f0}
+.badge-green{background:#e9f5ef;color:var(--green);border:1px solid #b7dfc9}
+.badge-red{background:#fdecea;color:var(--red);border:1px solid #f5c6c2}
+.badge-gold{background:#fff8e5;color:var(--gold);border:1px solid #ead49b}
+
+.muted{color:var(--muted)}
+.strong{font-weight:800}
+.center{text-align:center}
+.right{text-align:right}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* Semana */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+.day-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  min-height:220px;
+  box-shadow:var(--shadow);
+}
+.day-name{font-size:18px;font-weight:900;color:var(--primary);text-transform:capitalize;margin-bottom:4px}
+.day-date{font-size:14px;color:var(--muted);margin-bottom:10px}
+.day-summary{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.empty-day{color:var(--muted);font-size:14px;line-height:1.5}
+
+.product-week-card{
+  border:1px solid var(--border);
+  background:var(--soft);
+  border-radius:10px;
+  margin-bottom:10px;
+  overflow:hidden;
+}
+.product-week-toggle{
+  width:100%;
+  border:none;
+  background:transparent;
+  padding:11px;
+  cursor:pointer;
+  text-align:left;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  font-family:'DM Sans',sans-serif;
+  color:var(--text);
+}
+.product-week-title{font-weight:900;font-size:16px;margin-bottom:4px}
+.product-week-meta{font-size:13px;line-height:1.45;color:var(--text)}
+.product-week-hint{font-size:11px;color:var(--muted);margin-top:5px}
+.product-week-chevron{font-weight:900;color:var(--primary);font-size:20px;transition:transform .2s ease}
+.product-week-card.open .product-week-chevron{transform:rotate(180deg)}
+.product-week-detail{display:none;border-top:1px dashed var(--border);padding:10px 11px 12px;background:#fff}
+.product-week-card.open .product-week-detail{display:block}
+.deliver-title{font-size:11px;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
+
+.client-week-card{background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:7px}
+.client-week-top{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+.client-week-qty{font-weight:900;color:var(--green);white-space:nowrap}
+.client-week-meta{font-size:11px;color:var(--muted);line-height:1.55;margin-top:5px}
+
+.stage-week-card{background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:9px;margin-top:8px}
+.stage-week-title{font-size:12px;font-weight:900;color:var(--primary);margin-bottom:6px;text-transform:uppercase}
+.stage-week-row{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:5px 0;border-bottom:1px dashed var(--border)}
+.stage-week-row:last-child{border-bottom:none}
+.stage-week-row strong{white-space:nowrap;color:var(--green)}
+.stage-week-row .no-stock{color:var(--muted);font-weight:700}
+
+/* Recetas */
+.recipe-layout{display:grid;grid-template-columns:360px 1fr;gap:16px;align-items:start}
+.recipe-list{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.recipe-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.recipe-card h3{font-size:18px;margin-bottom:4px;color:var(--primary)}
+.recipe-stage{background:var(--soft);border:1px solid var(--border);border-radius:10px;padding:10px;margin-top:10px}
+.recipe-stage-title{font-size:13px;font-weight:900;color:var(--green);margin-bottom:7px;text-transform:uppercase}
+.recipe-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--border)}
+.recipe-row:last-child{border-bottom:none}
+.recipe-row strong{white-space:nowrap}
+.calc-output{background:#1f1f1f;color:#f7f1e8;border-radius:12px;padding:14px;white-space:pre-wrap;line-height:1.7;font-family:Consolas,monospace;font-size:13px;min-height:200px}
+
+.calc-output-html{background:#1f1f1f;color:#f7f1e8;border-radius:12px;padding:14px;line-height:1.55;font-size:13px;min-height:200px}
+.calc-main-title{font-weight:900;font-size:14px;margin-bottom:4px;color:#fff}
+.calc-main-meta{font-family:Consolas,monospace;color:#f7f1e8;margin-bottom:10px;font-size:12px}
+.poolish-alert{background:#fff8e5;border:1px solid #ead49b;color:#3d2b1a;border-radius:12px;padding:12px;margin:10px 0}
+.poolish-alert-title{font-size:13px;font-weight:900;color:var(--gold);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.poolish-alert-sub{font-size:12px;color:#6f6a65;line-height:1.4;margin-bottom:8px}
+.calc-stage{background:#2a2a2a;border:1px solid #444;border-radius:10px;padding:10px;margin-top:10px}
+.calc-stage.poolish{background:#3a2e16;border-color:#b8860b}
+.calc-stage-title{font-size:12px;font-weight:900;text-transform:uppercase;margin-bottom:7px;color:#fff}
+.calc-stage.poolish .calc-stage-title{color:#ffd36a}
+.calc-row{display:flex;justify-content:space-between;gap:10px;font-family:Consolas,monospace;font-size:12px;padding:4px 0;border-bottom:1px dashed rgba(255,255,255,.14)}
+.calc-row:last-child{border-bottom:none}
+.calc-row strong{white-space:nowrap;color:#d6ffd6}
+.calc-note{font-size:12px;color:#d8d2ca;margin-top:8px;line-height:1.4}
+.stage-week-card.poolish{background:#fff8e5;border-color:#ead49b}
+.stage-week-card.poolish .stage-week-title{color:var(--gold)}
+.poolish-mini-note{font-size:11px;color:var(--muted);margin:-2px 0 7px;line-height:1.35}
+
+/* Producción */
+.production-layout{display:grid;grid-template-columns:420px 1fr;gap:16px;align-items:start}
+.production-panel{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.production-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.kpi{background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:10px;text-align:center}
+.kpi-label{font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.kpi-value{font-size:17px;font-weight:900;color:var(--primary)}
+.production-client-list{margin-top:8px}
+.prod-result{background:#f7fbf8;border:1px solid #b7dfc9;color:var(--green);border-radius:12px;padding:12px;margin-top:12px;font-size:13px;line-height:1.6}
+.prod-warning{background:#fff5f4;border:1px solid #f5c6c2;color:var(--red);border-radius:12px;padding:12px;margin-top:12px;font-size:13px;line-height:1.6}
+.table-list{width:100%;border-collapse:collapse;font-size:13px}
+.table-list th{background:var(--green);color:#fff;text-align:left;padding:8px;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.table-list td{border-bottom:1px solid var(--border);padding:8px;vertical-align:top}
+.table-list tr:hover td{background:var(--soft)}
+
+@media(max-width:1200px){
+  .header{grid-template-columns:1fr;text-align:center}.back-link{justify-self:center}.week-grid{grid-template-columns:1fr 1fr}.recipe-layout,.production-layout{grid-template-columns:1fr}.recipe-list{grid-template-columns:1fr}.toolbar{grid-template-columns:1fr}.production-summary{grid-template-columns:1fr 1fr}
+}
+@media(max-width:700px){body{padding:14px}.tabs{grid-template-columns:1fr}.week-grid{grid-template-columns:1fr}.grid-2,.grid-3{grid-template-columns:1fr}h1{font-size:34px}.subtitle{font-size:16px}.production-summary{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="brand-header">
-  <div class="brand-left">
-    <img src="Ulaku H.png" alt="ulaku BREAD" class="brand-logo">
-    <div><div class="brand-title">ERP Inventario</div><div class="brand-sub">Recetas, producción, compras y stock</div></div>
+
+<div class="header">
+  <img src="Ulaku H.png" alt="ulaku BREAD" class="logo">
+  <div>
+    <h1>ERP Inventario</h1>
+    <div class="subtitle">Semana, recetas y producción por etapas</div>
   </div>
-  <a class="link-back" href="index.html">← Volver a pedidos</a>
-</div>
-<div id="alerta" class="alert"></div>
-<div class="nav-tabs">
-  <button class="nav-tab active" id="nav-stock" onclick="setTab('stock')">📦 Stock</button>
-  <button class="nav-tab" id="nav-recetas" onclick="setTab('recetas')">🧮 Recetas</button>
-  <button class="nav-tab" id="nav-produccion" onclick="setTab('produccion')">🥖 Producción</button>
-  <button class="nav-tab" id="nav-calendario" onclick="setTab('calendario')">📅 Semana</button>
-  <button class="nav-tab" id="nav-compras" onclick="setTab('compras')">🛒 Compras</button>
-  <button class="nav-tab" id="nav-movimientos" onclick="setTab('movimientos')">📋 Movimientos</button>
+  <a href="index.html" class="back-link">← Volver a pedidos</a>
 </div>
 
-<section id="tab-stock" class="tab-view active">
-  <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">Insumos</div><div class="kpi-value" id="kpi-insumos">0</div></div>
-    <div class="kpi"><div class="kpi-label">Recetas</div><div class="kpi-value" id="kpi-recetas">0</div></div>
-    <div class="kpi"><div class="kpi-label">Alertas stock</div><div class="kpi-value" id="kpi-alertas">0</div></div>
-    <div class="kpi"><div class="kpi-label">Valor inventario</div><div class="kpi-value" id="kpi-valor">$0</div></div>
-  </div>
-  <div class="card">
-    <div class="actions-row" style="justify-content:space-between;margin-bottom:10px;">
-      <div><p class="section-title" style="margin-bottom:2px;">Inventario actual</p><p class="section-sub" style="margin:0;">Stock disponible por insumo, unidad y costo unitario.</p></div>
-      <button class="btn btn-light" onclick="cargarTodo()">Actualizar</button>
-    </div>
-    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Insumo</th><th>Unidad</th><th class="num">Stock</th><th class="num">Costo unitario</th><th class="num">Valor</th><th>Estado</th></tr></thead><tbody id="tbody-stock"><tr><td colspan="7">Cargando...</td></tr></tbody></table></div>
-  </div>
-</section>
+<div id="alert" class="alert"></div>
 
-<section id="tab-recetas" class="tab-view">
+<div class="tabs">
+  <button class="tab-btn active" id="tab-semana-btn" onclick="setTab('semana')">🗓️ Semana</button>
+  <button class="tab-btn" id="tab-recetas-btn" onclick="setTab('recetas')">🧾 Recetas</button>
+  <button class="tab-btn" id="tab-produccion-btn" onclick="setTab('produccion')">🏭 Producción</button>
+</div>
+
+<section id="view-semana" class="view active">
   <div class="card">
-    <p class="section-title">Calculadora de recetas</p>
-    <p class="section-sub">Simula cuántos insumos necesitas antes de registrar producción. Aquí todavía no se descuenta inventario.</p>
-    <div class="grid-3">
-      <div><label>Receta / producto</label><select id="sel-receta" onchange="calcularReceta()"></select></div>
-      <div><label>Cantidad a producir</label><input id="qty-receta" type="number" min="1" step="1" value="1" oninput="calcularReceta()"></div>
-      <div style="display:flex;align-items:end;"><button class="btn btn-purple" style="width:100%;" onclick="agregarLoteDesdeCalculadora()">Agregar a lote</button></div>
+    <div class="toolbar">
+      <div>
+        <div class="card-title">Calendario semanal de producción</div>
+        <div class="card-subtitle">Lee pedidos por fecha de entrega, agrupa por producto, muestra para quién es cada pedido y calcula Poolish por etapas.</div>
+      </div>
+      <div>
+        <label>Semana</label>
+        <input type="date" id="semana-fecha">
+      </div>
+      <button class="btn btn-blue" onclick="cargarSemanaProduccion()">Ver semana</button>
     </div>
   </div>
-  <div class="card">
-    <p class="section-title">Resultado de receta</p>
-    <div class="table-wrap"><table><thead><tr><th>Insumo</th><th>Unidad</th><th class="num">Por unidad</th><th class="num">Necesario</th><th class="num">Stock actual</th><th class="num">Stock final</th><th class="num">Costo estimado</th><th>Estado</th></tr></thead><tbody id="tbody-calculo"><tr><td colspan="8">Selecciona una receta.</td></tr></tbody></table></div>
-    <div class="recipe-total"><span>Costo estimado del lote</span><span id="total-receta">$0</span></div>
-  </div>
+  <div id="semana-grid" class="week-grid"></div>
 </section>
 
-<section id="tab-produccion" class="tab-view">
-  <div class="grid-2">
+<section id="view-recetas" class="view">
+  <div class="recipe-layout">
     <div class="card">
-      <p class="section-title">Lote de producción</p>
-      <p class="section-sub">Puedes registrar una o varias recetas en una misma producción.</p>
+      <div class="card-title">Calcular receta</div>
+      <div class="card-subtitle" style="margin-bottom:14px">Selecciona una receta y una cantidad. Si tiene Poolish, te lo muestra primero como proceso previo antes de la masa final.</div>
+      <label>Receta</label>
+      <select id="calc-receta" onchange="calcularReceta()"></select>
+      <div style="height:10px"></div>
+      <label>Cantidad a preparar</label>
+      <input type="number" id="calc-cantidad" min="1" step="1" value="1" oninput="calcularReceta()">
+      <div style="height:12px"></div>
+      <div id="calc-resultado" class="calc-output-html">Cargando...</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recetas cargadas</div>
+      <div class="card-subtitle" style="margin-bottom:14px">Si aparece 01-RECETA, revisa BD_RECETAS y llena etapa_orden y etapa_nombre.</div>
+      <div id="recetas-list" class="recipe-list"></div>
+    </div>
+  </div>
+</section>
+
+<section id="view-produccion" class="view">
+  <div class="production-layout">
+    <div class="card">
+      <div class="card-title">Registrar producción</div>
+      <div class="card-subtitle" style="margin-bottom:14px">Registra la producción terminada. Esto descuenta del stock los ingredientes marcados como descontables.</div>
+
       <div class="grid-2">
-        <div><label>Fecha producción</label><input id="fecha-produccion" type="date"></div>
-        <div><label>Estado</label><input value="Por registrar" disabled></div>
+        <div>
+          <label>Fecha producción</label>
+          <input type="date" id="prod-fecha-produccion">
+        </div>
+        <div>
+          <label>Fecha entrega</label>
+          <input type="date" id="prod-fecha-entrega">
+        </div>
       </div>
-      <div id="lote-lista" style="margin-top:12px;"><p class="mini">Todavía no hay productos en el lote.</p></div>
-      <div class="actions-row" style="margin-top:12px;">
-        <button class="btn btn-green" id="btn-registrar-prod" onclick="registrarProduccion()" disabled>Registrar producción y descontar</button>
-        <button class="btn btn-light" onclick="limpiarLote()">Limpiar</button>
+      <div style="height:10px"></div>
+
+      <label>Receta</label>
+      <select id="prod-receta" onchange="calcularProduccionPreview()"></select>
+      <div style="height:10px"></div>
+
+      <label>Producto</label>
+      <input type="text" id="prod-producto" placeholder="Ej. Pan Molde">
+      <div style="height:10px"></div>
+
+      <label>Cantidad producida</label>
+      <input type="number" id="prod-cantidad" min="1" step="1" value="1" oninput="calcularProduccionPreview()">
+      <div style="height:10px"></div>
+
+      <label>Notas</label>
+      <textarea id="prod-notas" placeholder="Ej. Producción desde semana, lote especial, observaciones..."></textarea>
+      <div style="height:12px"></div>
+
+      <button class="btn btn-green" style="width:100%" onclick="registrarProduccion()">Registrar producción y descontar stock</button>
+
+      <div id="prod-resultado"></div>
+    </div>
+
+    <div>
+      <div class="production-panel">
+        <div class="card-title">Orden de producción</div>
+        <div class="card-subtitle" style="margin-bottom:12px">Puedes llenar esta orden manualmente o traerla desde la pestaña Semana.</div>
+        <div id="prod-preview"></div>
+      </div>
+
+      <div class="production-panel" style="margin-top:16px">
+        <div class="card-title">Últimas producciones</div>
+        <div class="card-subtitle" style="margin-bottom:12px">Registros guardados en BD_PRODUCCION.</div>
+        <div id="producciones-list">Cargando...</div>
       </div>
     </div>
-    <div class="card">
-      <p class="section-title">Impacto del lote</p>
-      <p class="section-sub">Consolidado de insumos necesarios para todo el lote.</p>
-      <div class="table-wrap"><table><thead><tr><th>Insumo</th><th class="num">Necesario</th><th class="num">Stock</th><th>Estado</th></tr></thead><tbody id="tbody-impacto"><tr><td colspan="4">Agrega recetas al lote.</td></tr></tbody></table></div>
-    </div>
-  </div>
-</section>
-
-<section id="tab-calendario" class="tab-view">
-  <div class="card">
-    <div class="actions-row" style="justify-content:space-between;">
-      <div><p class="section-title" style="margin-bottom:2px;">Calendario semanal de producción</p><p class="section-sub" style="margin:0;">Lee pedidos por fecha de entrega y agrupa qué se debe producir.</p></div>
-      <div class="actions-row"><input id="semana-inicio" type="date" style="width:165px;"><button class="btn btn-blue" onclick="cargarSemana()">Ver semana</button></div>
-    </div>
-  </div>
-  <div id="week-grid" class="week-grid"></div>
-</section>
-
-<section id="tab-compras" class="tab-view">
-  <div class="card">
-    <p class="section-title">Entrada de almacén por compra</p>
-    <p class="section-sub">Registra compras para aumentar inventario. Esto crea trazabilidad en movimientos.</p>
-    <div class="grid-3">
-      <div><label>Fecha entrada</label><input id="compra-fecha" type="date"></div>
-      <div><label>Proveedor</label><input id="compra-proveedor" type="text" placeholder="Proveedor"></div>
-      <div><label>Factura / soporte</label><input id="compra-factura" type="text" placeholder="Opcional"></div>
-    </div>
-    <div style="margin-top:12px;"><label>Notas</label><textarea id="compra-notas" placeholder="Observaciones de la compra"></textarea></div>
-  </div>
-  <div class="card">
-    <div class="actions-row" style="justify-content:space-between;margin-bottom:10px;"><p class="section-title" style="margin:0;">Insumos comprados</p><button class="btn btn-light" onclick="agregarItemCompra()">+ Agregar insumo</button></div>
-    <div id="items-compra"></div>
-    <button class="btn btn-gold" id="btn-registrar-compra" onclick="registrarEntradaAlmacen()">Registrar entrada de almacén</button>
-  </div>
-</section>
-
-<section id="tab-movimientos" class="tab-view">
-  <div class="card">
-    <div class="actions-row" style="justify-content:space-between;margin-bottom:10px;"><div><p class="section-title" style="margin-bottom:2px;">Movimientos de inventario</p><p class="section-sub" style="margin:0;">Entradas, salidas por producción y ajustes.</p></div><button class="btn btn-light" onclick="cargarMovimientos()">Actualizar</button></div>
-    <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Origen</th><th>Insumo</th><th class="num">Cantidad</th><th class="num">Antes</th><th class="num">Después</th><th>Notas</th></tr></thead><tbody id="tbody-movs"><tr><td colspan="8">Cargando...</td></tr></tbody></table></div>
   </div>
 </section>
 
 <script>
+// Cambia esta URL si vuelves a implementar Apps Script y te entrega una nueva.
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzOHqQskoePhBN0C_vxeYLE96bqbKAah-CCC1Dh0YFfk3G1VeOH2oSCnOpfOoS7w-Q_/exec';
-let INVENTARIO = [];
-let RECETAS = [];
-let HISTORIAL = [];
-let LOTE = [];
-let COMPRA_ID = 0;
-const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 
-document.addEventListener('DOMContentLoaded', () => {
-  setToday('fecha-produccion');
-  setToday('compra-fecha');
-  document.getElementById('semana-inicio').value = isoDate(getMonday(new Date()));
-  cargarTodo();
-});
+let RECETAS = [];
+let PRODUCTOS_SEMANA = {};
+let PRODUCCION_CLIENTES = [];
+let PRODUCCION_CODIGO_PRODUCTO = '';
+
+const fmtCO = new Intl.NumberFormat('es-CO');
+const moneyCO = new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0});
+
+document.addEventListener('DOMContentLoaded', iniciar);
+
+async function iniciar(){
+  const hoy = new Date();
+  document.getElementById('semana-fecha').value = fechaInput(lunesDeSemana(hoy));
+  document.getElementById('prod-fecha-produccion').value = fechaInput(hoy);
+  document.getElementById('prod-fecha-entrega').value = fechaInput(hoy);
+  await cargarRecetas();
+  await cargarSemanaProduccion();
+  await cargarProducciones();
+}
 
 function setTab(tab){
-  document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-  document.getElementById('nav-' + tab).classList.add('active');
-  if(tab === 'calendario') cargarSemana();
-  if(tab === 'movimientos') cargarMovimientos();
+  ['semana','recetas','produccion'].forEach(t=>{
+    document.getElementById('view-'+t).classList.toggle('active', t === tab);
+    document.getElementById('tab-'+t+'-btn').classList.toggle('active', t === tab);
+  });
+  if(tab === 'semana') cargarSemanaProduccion();
+  if(tab === 'recetas') calcularReceta();
+  if(tab === 'produccion') calcularProduccionPreview();
 }
-function alerta(tipo,msg){const el=document.getElementById('alerta');el.className='alert show alert-' + tipo;el.innerHTML=msg;setTimeout(()=>{el.classList.remove('show')},7000)}
-function pesos(n){return '$' + (Number(n)||0).toLocaleString('es-CO',{maximumFractionDigits:0})}
-function num(n,d=2){return (Number(n)||0).toLocaleString('es-CO',{maximumFractionDigits:d})}
-function isoDate(d){return d.toISOString().slice(0,10)}
-function setToday(id){document.getElementById(id).value=isoDate(new Date())}
-function getMonday(d){const x=new Date(d);const day=x.getDay();const diff=x.getDate()-day+(day===0?-6:1);x.setDate(diff);x.setHours(0,0,0,0);return x}
-function parseLocalDate(s){const [a,m,d]=String(s).split('-').map(Number);return new Date(a,m-1,d)}
-function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
 
-function jsonp(params){
+function showAlert(msg,tipo='ok'){
+  const el = document.getElementById('alert');
+  el.className = 'alert show alert-' + tipo;
+  el.innerHTML = msg;
+  clearTimeout(showAlert._t);
+  showAlert._t = setTimeout(()=>{ el.className='alert'; el.innerHTML=''; }, 8000);
+}
+
+function esc(v){
+  return String(v ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'",'&#039;');
+}
+
+function num(v){
+  const n = Number(String(v ?? '').replace(/[^0-9,.-]/g,'').replace(',','.'));
+  return isNaN(n) ? 0 : n;
+}
+
+function fechaInput(d){
+  const x = new Date(d);
+  x.setMinutes(x.getMinutes() - x.getTimezoneOffset());
+  return x.toISOString().slice(0,10);
+}
+
+function lunesDeSemana(d){
+  const x = new Date(d);
+  const day = x.getDay();
+  const diff = x.getDate() - day + (day === 0 ? -6 : 1);
+  x.setDate(diff);
+  x.setHours(0,0,0,0);
+  return x;
+}
+
+function cargarJSONPConParams(params){
   return new Promise((resolve,reject)=>{
-    const cb='jsonp_'+Date.now()+'_'+Math.floor(Math.random()*100000);
-    const qs = params instanceof URLSearchParams ? params : new URLSearchParams(params);
-    qs.set('callback',cb);
-    const script=document.createElement('script');
-    window[cb]=(data)=>{delete window[cb];script.remove();resolve(data)};
-    script.onerror=()=>{delete window[cb];script.remove();reject(new Error('No se pudo conectar con Apps Script'))};
-    script.src=SCRIPT_URL+'?'+qs.toString();
+    const cbName = 'jsonp_' + Date.now() + '_' + Math.floor(Math.random()*10000);
+    const script = document.createElement('script');
+    params.set('callback',cbName);
+    window[cbName] = function(data){
+      delete window[cbName];
+      script.remove();
+      resolve(data);
+    };
+    script.src = SCRIPT_URL + '?' + params.toString();
+    script.onerror = function(){
+      delete window[cbName];
+      script.remove();
+      reject(new Error('No se pudo conectar con Apps Script'));
+    };
     document.body.appendChild(script);
   });
 }
 
-async function cargarTodo(){
+async function cargarRecetas(){
   try{
-    const data = await jsonp({accion:'getInventarioCompleto'});
-    if(!data.ok) throw new Error(data.error || 'No fue posible cargar inventario');
-    INVENTARIO = data.inventario || [];
-    RECETAS = data.recetas || [];
-    HISTORIAL = data.historial || [];
-    pintarStock();
-    pintarSelectorRecetas();
+    const params = new URLSearchParams({accion:'getRecetas'});
+    const r = await cargarJSONPConParams(params);
+    if(!r.ok) throw new Error(r.error || 'No se pudieron cargar las recetas');
+    RECETAS = r.recetas || [];
+    pintarSelectRecetas();
+    pintarRecetas();
     calcularReceta();
-    pintarImpactoLote();
-    cargarMovimientos(false);
-    alerta('ok','✅ Inventario cargado correctamente.');
+    calcularProduccionPreview();
   }catch(err){
-    alerta('warn','❌ Error cargando inventario: '+err.message);
+    showAlert('❌ ' + esc(err.message),'warn');
   }
 }
 
-function stockById(){const m={};INVENTARIO.forEach(i=>m[i.id]=i);return m}
-function recetaById(id){return RECETAS.find(r=>r.id===id)}
-function pintarStock(){
-  const tbody=document.getElementById('tbody-stock');
-  const alertas = INVENTARIO.filter(i => Number(i.stock || 0) <= Number(i.nivel_minimo || 0) && String(i.nivel_minimo||'').trim() !== '');
-  const valor = INVENTARIO.reduce((s,i)=>s+(Number(i.stock)||0)*(Number(i.precio_unitario)||0),0);
-  document.getElementById('kpi-insumos').textContent = INVENTARIO.length;
-  document.getElementById('kpi-recetas').textContent = RECETAS.length;
-  document.getElementById('kpi-alertas').textContent = alertas.length;
-  document.getElementById('kpi-valor').textContent = pesos(valor);
-  if(!INVENTARIO.length){tbody.innerHTML='<tr><td colspan="7">No hay insumos cargados.</td></tr>';return;}
-  tbody.innerHTML = INVENTARIO.map(i=>{
-    const stock=Number(i.stock)||0, min=Number(i.nivel_minimo)||0, pu=Number(i.precio_unitario)||0;
-    const tieneMin=String(i.nivel_minimo||'').trim()!=='';
-    const estado = tieneMin && stock <= min ? '<span class="badge badge-bad">Bajo</span>' : '<span class="badge badge-ok">OK</span>';
-    return `<tr><td>${i.id}</td><td><strong>${i.nombre||''}</strong></td><td>${i.unidad||''}</td><td class="num">${num(stock)}</td><td class="num">${pesos(pu)}</td><td class="num">${pesos(stock*pu)}</td><td>${estado}</td></tr>`;
-  }).join('');
+function pintarSelectRecetas(){
+  const html = RECETAS.map(r=>`<option value="${esc(r.id)}">${esc(r.id)} — ${esc(r.nombre)}</option>`).join('') || '<option value="">Sin recetas</option>';
+  document.getElementById('calc-receta').innerHTML = html;
+  document.getElementById('prod-receta').innerHTML = html;
+  const primera = RECETAS[0];
+  if(primera && !document.getElementById('prod-producto').value){
+    document.getElementById('prod-producto').value = primera.nombre || '';
+  }
 }
 
-function pintarSelectorRecetas(){
-  const sel=document.getElementById('sel-receta');
-  sel.innerHTML = RECETAS.map(r=>`<option value="${r.id}">${r.id} — ${r.nombre}</option>`).join('');
+function pintarRecetas(){
+  const cont = document.getElementById('recetas-list');
+  cont.innerHTML = RECETAS.map(r=>{
+    const etapasHtml = (r.etapas || []).map(etapa=>`
+      <div class="recipe-stage">
+        <div class="recipe-stage-title">${esc(etapa.etapa_nombre)}</div>
+        ${(etapa.ingredientes || []).map(i=>`
+          <div class="recipe-row">
+            <span>${esc(i.nombre)} ${i.descuentable ? '' : '<span class="badge badge-purple">No descuenta</span>'}</span>
+            <strong>${fmtCO.format(num(i.cantidad_unitaria))} ${esc(i.unidad)}</strong>
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+
+    return `
+      <div class="recipe-card">
+        <h3>${esc(r.nombre)}</h3>
+        <div class="muted strong">${esc(r.id)} · ${moneyCO.format(num(r.costo_unitario))}</div>
+        ${etapasHtml || '<div class="muted" style="margin-top:10px">Sin etapas cargadas.</div>'}
+      </div>
+    `;
+  }).join('') || '<div class="card-subtitle">No hay recetas cargadas.</div>';
+}
+
+function etapaEsPoolish(etapa){
+  const nombre = String(etapa?.etapa_nombre || '').toUpperCase();
+  return nombre.includes('POOLISH') || nombre.includes('PREFERMENTO') || nombre.includes('PRE-FERMENTO');
+}
+
+function renderIngredientesCalc(ingredientes, cantidad){
+  return (ingredientes || []).map(i=>{
+    const total = num(i.cantidad_unitaria) * cantidad;
+    return `
+      <div class="calc-row">
+        <span>${esc(i.nombre)}${i.descuentable ? '' : ' <span class="no-stock">(no descuenta)</span>'}</span>
+        <strong>${fmtCO.format(total)} ${esc(i.unidad)}</strong>
+      </div>
+    `;
+  }).join('');
 }
 
 function calcularReceta(){
-  const recId=document.getElementById('sel-receta').value;
-  const qty=Number(document.getElementById('qty-receta').value)||0;
-  const receta=recetaById(recId);
-  const tbody=document.getElementById('tbody-calculo');
-  const sMap=stockById();
-  if(!receta || qty<=0){tbody.innerHTML='<tr><td colspan="8">Selecciona una receta y cantidad.</td></tr>';document.getElementById('total-receta').textContent=pesos(0);return;}
-  let total=0;
-  tbody.innerHTML = receta.ingredientes.map(ing=>{
-    const st=sMap[ing.id] || {};
-    const requerido=(Number(ing.cantidad_unitaria)||0)*qty;
-    const stock=Number(st.stock)||0;
-    const final=stock-requerido;
-    const costo=requerido*(Number(st.precio_unitario)||0);
-    total+=costo;
-    const estado = !ing.descuentable ? '<span class="badge badge-info">No descuenta</span>' : final < 0 ? '<span class="badge badge-bad">Falta</span>' : '<span class="badge badge-ok">OK</span>';
-    return `<tr><td><strong>${ing.nombre}</strong><br><span class="mini">${ing.id}</span></td><td>${ing.unidad||st.unidad||''}</td><td class="num">${num(ing.cantidad_unitaria)}</td><td class="num">${num(requerido)}</td><td class="num">${num(stock)}</td><td class="num ${final<0?'bad':'ok'}">${num(final)}</td><td class="num">${pesos(costo)}</td><td>${estado}</td></tr>`;
-  }).join('');
-  document.getElementById('total-receta').textContent=pesos(total);
+  const id = document.getElementById('calc-receta')?.value;
+  const qty = Math.max(1,num(document.getElementById('calc-cantidad')?.value || 1));
+  const receta = RECETAS.find(r=>r.id===id);
+  const out = document.getElementById('calc-resultado');
+
+  if(!receta){
+    out.innerHTML = 'No hay receta seleccionada.';
+    return;
+  }
+
+  const etapas = receta.etapas || [];
+  const poolish = etapas.find(etapaEsPoolish);
+  const otrasEtapas = etapas.filter(e=>!etapaEsPoolish(e));
+  const costo = num(receta.costo_unitario) * qty;
+
+  const poolishHtml = poolish ? `
+    <div class="poolish-alert">
+      <div class="poolish-alert-title">Preparar primero: ${esc(poolish.etapa_nombre)}</div>
+      <div class="poolish-alert-sub">Este es el proceso previo. Debe hacerse antes de la masa final. Aquí ves exactamente qué preparar para ${fmtCO.format(qty)} unidad(es).</div>
+      <div class="calc-stage poolish">
+        <div class="calc-stage-title">${esc(poolish.etapa_nombre)}</div>
+        ${renderIngredientesCalc(poolish.ingredientes || [], qty)}
+      </div>
+    </div>
+  ` : `
+    <div class="calc-note">Esta receta no tiene Poolish separado. Si debería tenerlo, revisa BD_RECETAS y crea la etapa <strong>01-POOLISH</strong>.</div>
+  `;
+
+  const etapasHtml = otrasEtapas.map(etapa=>`
+    <div class="calc-stage">
+      <div class="calc-stage-title">${esc(etapa.etapa_nombre)}</div>
+      ${renderIngredientesCalc(etapa.ingredientes || [], qty)}
+    </div>
+  `).join('');
+
+  out.innerHTML = `
+    <div class="calc-main-title">RECETA: ${esc(receta.nombre)}</div>
+    <div class="calc-main-meta">CANTIDAD A PREPARAR: ${fmtCO.format(qty)}<br>COSTO ESTIMADO: ${moneyCO.format(costo)}</div>
+    ${poolishHtml}
+    <div class="calc-stage-title" style="margin-top:12px">Masa final / proceso principal</div>
+    ${etapasHtml || '<div class="calc-note">Sin etapas finales cargadas.</div>'}
+  `;
 }
 
-function agregarLoteDesdeCalculadora(){
-  const recId=document.getElementById('sel-receta').value;
-  const qty=Number(document.getElementById('qty-receta').value)||0;
-  const receta=recetaById(recId);
-  if(!receta || qty<=0){alerta('warn','Debes seleccionar una receta y una cantidad mayor a cero.');return;}
-  LOTE.push({id:receta.id,nombre:receta.nombre,qty});
-  pintarLote();
-  pintarImpactoLote();
-  setTab('produccion');
-}
-function pintarLote(){
-  const div=document.getElementById('lote-lista');
-  document.getElementById('btn-registrar-prod').disabled = LOTE.length===0;
-  if(!LOTE.length){div.innerHTML='<p class="mini">Todavía no hay productos en el lote.</p>';return;}
-  div.innerHTML = LOTE.map((l,i)=>`<div class="lote-item"><div><strong>${l.nombre}</strong><br><span class="mini">${l.id} · ${num(l.qty,0)} unidad(es)</span></div><button class="btn btn-danger" style="padding:8px 10px;" onclick="quitarLote(${i})">Quitar</button></div>`).join('');
-}
-function quitarLote(i){LOTE.splice(i,1);pintarLote();pintarImpactoLote()}
-function limpiarLote(){LOTE=[];pintarLote();pintarImpactoLote()}
-function pintarImpactoLote(){
-  const tbody=document.getElementById('tbody-impacto');
-  const sMap=stockById();
-  const req={};
-  LOTE.forEach(l=>{
-    const r=recetaById(l.id); if(!r) return;
-    r.ingredientes.forEach(ing=>{if(!ing.descuentable) return; req[ing.id]=(req[ing.id]||0)+(Number(ing.cantidad_unitaria)||0)*(Number(l.qty)||0);});
-  });
-  const ids=Object.keys(req);
-  if(!ids.length){tbody.innerHTML='<tr><td colspan="4">Agrega recetas al lote.</td></tr>';return;}
-  tbody.innerHTML = ids.map(id=>{
-    const st=sMap[id]||{}; const stock=Number(st.stock)||0; const final=stock-req[id];
-    return `<tr><td><strong>${st.nombre||id}</strong><br><span class="mini">${id}</span></td><td class="num">${num(req[id])} ${st.unidad||''}</td><td class="num">${num(stock)}</td><td>${final<0?'<span class="badge badge-bad">Falta '+num(Math.abs(final))+'</span>':'<span class="badge badge-ok">OK</span>'}</td></tr>`;
-  }).join('');
-}
-async function registrarProduccion(){
-  if(!LOTE.length) return;
-  if(!confirm('¿Registrar producción y descontar inventario?')) return;
-  const btn=document.getElementById('btn-registrar-prod'); btn.disabled=true; btn.textContent='Registrando...';
-  try{
-    const params=new URLSearchParams({accion:'registrarProduccion',fecha:document.getElementById('fecha-produccion').value,lotes:JSON.stringify(LOTE)});
-    const res=await jsonp(params);
-    if(!res.ok) throw new Error(res.error || 'No se pudo registrar producción');
-    alerta('ok','✅ '+(res.mensaje||'Producción registrada')+(res.alertas&&res.alertas.length?'<br>⚠️ '+res.alertas.join('<br>'):''));
-    limpiarLote();
-    await cargarTodo();
-  }catch(err){alerta('warn','❌ '+err.message)}
-  finally{btn.textContent='Registrar producción y descontar';btn.disabled=LOTE.length===0;}
-}
+async function cargarSemanaProduccion(){
+  const cont = document.getElementById('semana-grid');
+  cont.innerHTML = '<div class="card-subtitle">Cargando semana...</div>';
+  PRODUCTOS_SEMANA = {};
 
-async function cargarSemana(){
-  const cont=document.getElementById('week-grid');
-  const inicio=document.getElementById('semana-inicio').value || isoDate(getMonday(new Date()));
-  cont.innerHTML='<div class="card">Cargando semana...</div>';
   try{
-    const res=await jsonp({accion:'getCalendarioProduccion',fecha_inicio:inicio});
-    if(!res.ok) throw new Error(res.error || 'No se pudo cargar calendario');
-    const dias=res.dias || [];
-    cont.innerHTML = dias.map(d=>`<div class="day-card"><div class="day-title">${d.dia_nombre||''}</div><div class="day-date">${d.fecha||''}</div>${(d.productos||[]).length ? d.productos.map(p=>`<div class="prod-chip"><strong>${p.producto}</strong>${num(p.cantidad,0)} unidad(es)<br><span class="mini">${p.pedidos||0} pedido(s)</span></div>`).join('') : '<p class="mini">Sin producción programada.</p>'}</div>`).join('');
+    const fecha = document.getElementById('semana-fecha').value;
+    const params = new URLSearchParams({accion:'getCalendarioProduccion', fecha_inicio:fecha});
+    const r = await cargarJSONPConParams(params);
+    if(!r.ok) throw new Error(r.error || 'No se pudo cargar calendario');
+    pintarSemana(r.dias || []);
   }catch(err){
-    const start=parseLocalDate(inicio);
-    cont.innerHTML = Array.from({length:7},(_,i)=>{const d=addDays(start,i);return `<div class="day-card"><div class="day-title">${DIAS[d.getDay()]}</div><div class="day-date">${isoDate(d)}</div><p class="mini">Activa la función <strong>getCalendarioProduccion</strong> en Apps Script para ver pedidos reales.</p></div>`}).join('');
-    alerta('info','ℹ️ Para activar calendario real pega el parche de Apps Script que te dejé en el archivo adicional.');
+    cont.innerHTML = `<div class="alert alert-warn show">❌ ${esc(err.message)}</div>`;
   }
 }
 
-function agregarItemCompra(){
-  COMPRA_ID++;
-  const div=document.getElementById('items-compra');
-  const wrap=document.createElement('div');
-  wrap.className='purchase-item';
-  wrap.id='compra-item-'+COMPRA_ID;
-  wrap.innerHTML=`<div class="purchase-item-top"><div><label>Insumo</label><select class="compra-insumo">${INVENTARIO.map(i=>`<option value="${i.id}">${i.id} — ${i.nombre} (${i.unidad||''})</option>`).join('')}</select></div><div><label>Cantidad</label><input class="compra-cantidad" type="number" min="0" step="0.01" value="0"></div><div><label>Costo total</label><input class="compra-costo" type="number" min="0" step="1" value="0"></div><button class="btn btn-danger" onclick="document.getElementById('compra-item-${COMPRA_ID}').remove()">Quitar</button></div>`;
-  div.appendChild(wrap);
-}
-async function registrarEntradaAlmacen(){
-  const items=[...document.querySelectorAll('.purchase-item')].map(row=>{
-    const id=row.querySelector('.compra-insumo').value;
-    const ins=INVENTARIO.find(i=>i.id===id)||{};
-    const cantidad=Number(row.querySelector('.compra-cantidad').value)||0;
-    const costo_total=Number(row.querySelector('.compra-costo').value)||0;
-    return {id,nombre:ins.nombre||'',unidad:ins.unidad||'',cantidad,costo_total,costo_unitario:cantidad>0?costo_total/cantidad:0};
-  }).filter(i=>i.id && i.cantidad>0);
-  if(!items.length){alerta('warn','Agrega al menos un insumo con cantidad mayor a cero.');return;}
-  const params=new URLSearchParams({accion:'registrarEntradaAlmacen',fecha:document.getElementById('compra-fecha').value,proveedor:document.getElementById('compra-proveedor').value,factura:document.getElementById('compra-factura').value,notas:document.getElementById('compra-notas').value,items:JSON.stringify(items)});
-  try{
-    const res=await jsonp(params);
-    if(!res.ok) throw new Error(res.error || 'No se pudo registrar entrada');
-    alerta('ok','✅ '+(res.mensaje||'Entrada registrada'));
-    document.getElementById('items-compra').innerHTML=''; agregarItemCompra(); await cargarTodo();
-  }catch(err){alerta('warn','❌ '+err.message+'<br><span class="mini">Si es la primera vez, pega el parche Apps Script para compras.</span>')}
+function pintarSemana(dias){
+  const cont = document.getElementById('semana-grid');
+  if(!dias.length){
+    cont.innerHTML = '<div class="empty-day">No hay datos para esta semana.</div>';
+    return;
+  }
+
+  cont.innerHTML = dias.map(dia=>{
+    const productos = dia.productos || [];
+    const productosHtml = productos.length
+      ? productos.map((p, idx)=>pintarProductoSemana(p, dia, idx)).join('')
+      : '<div class="empty-day">Sin producción programada.</div>';
+
+    const resumen = num(dia.total_unidades) > 0
+      ? `<div class="day-summary"><span class="badge badge-blue">${fmtCO.format(num(dia.total_unidades))} und</span><span class="badge badge-purple">${fmtCO.format(num(dia.total_pedidos))} pedido(s)</span></div>`
+      : '';
+
+    return `
+      <div class="day-card">
+        <div class="day-name">${esc(dia.dia_nombre)}</div>
+        <div class="day-date">${esc(dia.fecha)}</div>
+        ${resumen}
+        ${productosHtml}
+      </div>
+    `;
+  }).join('');
 }
 
-async function cargarMovimientos(showAlert=true){
-  const tbody=document.getElementById('tbody-movs');
+function pintarProductoSemana(p, dia, idx){
+  const clientes = p.clientes || [];
+  const cantidadProducto = num(p.cantidad);
+  const pedidosProducto = num(p.pedidos || clientes.length);
+  const key = `${dia.fecha}_${idx}_${String(p.receta_id || p.producto).replace(/[^a-zA-Z0-9]/g,'')}`;
+
+  PRODUCTOS_SEMANA[key] = Object.assign({}, p, {fecha_entrega: dia.fecha, dia_nombre: dia.dia_nombre});
+
+  const clientesHtml = clientes.length
+    ? clientes.map(c=>`
+      <div class="client-week-card">
+        <div class="client-week-top">
+          <strong>${esc(c.cliente || 'Sin cliente')}</strong>
+          <span class="client-week-qty">${fmtCO.format(num(c.cantidad))} und</span>
+        </div>
+        <div class="client-week-meta">
+          ${c.id_pedido ? `<div>🧾 Pedido: ${esc(c.id_pedido)}</div>` : ''}
+          ${c.telefono ? `<div>📞 ${esc(c.telefono)}</div>` : ''}
+          ${c.direccion ? `<div>📍 ${esc(c.direccion)}</div>` : ''}
+          ${c.estado ? `<div>📌 Estado: ${esc(c.estado)}</div>` : ''}
+          ${c.estado_pago ? `<div>💰 Pago: ${esc(c.estado_pago)}</div>` : ''}
+          ${c.notas ? `<div>📝 ${esc(c.notas)}</div>` : ''}
+        </div>
+      </div>
+    `).join('')
+    : '<div class="muted">Sin detalle de clientes.</div>';
+
+  const etapasHtml = pintarEtapasHtml(p.etapas || []);
+
+  return `
+    <div class="product-week-card">
+      <button type="button" class="product-week-toggle" onclick="toggleProductoSemana(this)">
+        <div>
+          <div class="product-week-title">${esc(p.producto)}</div>
+          <div class="product-week-meta">
+            <div><strong>${fmtCO.format(cantidadProducto)}</strong> unidad(es)</div>
+            <div>${fmtCO.format(pedidosProducto)} pedido(s)</div>
+            ${p.receta_id ? `<div>Receta: ${esc(p.receta_id)}</div>` : ''}
+            <div class="product-week-hint">Clic para ver entregas, Poolish y producción</div>
+          </div>
+        </div>
+        <span class="product-week-chevron">⌄</span>
+      </button>
+
+      <div class="product-week-detail">
+        <div class="deliver-title">Para entregar</div>
+        ${clientesHtml}
+        <div class="deliver-title" style="margin-top:12px">Producción requerida</div>
+        ${etapasHtml || '<div class="muted">Sin receta detallada. Revisa MAPA_PROD_RECETA o BD_RECETAS.</div>'}
+        <button class="btn btn-green" style="width:100%;margin-top:12px" onclick="prepararProduccionDesdeSemana('${key}')">Llevar a producción</button>
+      </div>
+    </div>
+  `;
+}
+
+function pintarEtapasHtml(etapas){
+  if(!etapas || !etapas.length) return '';
+  return etapas.map(etapa=>{
+    const esPoolish = etapaEsPoolish(etapa);
+    return `
+      <div class="stage-week-card ${esPoolish ? 'poolish' : ''}">
+        <div class="stage-week-title">${esPoolish ? 'Preparar primero: ' : ''}${esc(etapa.etapa_nombre)}</div>
+        ${esPoolish ? '<div class="poolish-mini-note">Proceso previo antes de la masa final.</div>' : ''}
+        ${(etapa.ingredientes || []).map(ing=>`
+          <div class="stage-week-row">
+            <span>${esc(ing.nombre)} ${ing.descuentable ? '' : '<span class="no-stock">(no descuenta)</span>'}</span>
+            <strong>${fmtCO.format(num(ing.cantidad_total))} ${esc(ing.unidad)}</strong>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleProductoSemana(btn){
+  const card = btn.closest('.product-week-card');
+  if(card) card.classList.toggle('open');
+}
+
+function prepararProduccionDesdeSemana(key){
+  const p = PRODUCTOS_SEMANA[key];
+  if(!p){
+    showAlert('No encontré el producto de la semana. Recarga la semana e intenta de nuevo.','warn');
+    return;
+  }
+
+  setTab('produccion');
+  document.getElementById('prod-receta').value = p.receta_id || '';
+  document.getElementById('prod-producto').value = p.producto || '';
+  document.getElementById('prod-cantidad').value = num(p.cantidad) || 1;
+  document.getElementById('prod-fecha-entrega').value = p.fecha_entrega || '';
+  document.getElementById('prod-notas').value = `Producción creada desde Semana: ${p.fecha_entrega || ''}`;
+  PRODUCCION_CLIENTES = p.clientes || [];
+  PRODUCCION_CODIGO_PRODUCTO = p.codigo_producto || '';
+  calcularProduccionPreview();
+  showAlert('Producto cargado en Producción. Revisa y registra cuando esté producido.','info');
+}
+
+function calcularProduccionPreview(){
+  const id = document.getElementById('prod-receta')?.value;
+  const qty = Math.max(1,num(document.getElementById('prod-cantidad')?.value || 1));
+  const receta = RECETAS.find(r=>r.id===id);
+  const cont = document.getElementById('prod-preview');
+
+  if(!receta){
+    cont.innerHTML = '<div class="muted">No hay receta seleccionada.</div>';
+    return;
+  }
+
+  const etapas = calcularEtapasCliente(receta, qty);
+  const producto = document.getElementById('prod-producto').value || receta.nombre;
+  const costo = num(receta.costo_unitario) * qty;
+
+  const clientesHtml = PRODUCCION_CLIENTES.length
+    ? `<div class="deliver-title" style="margin-top:12px">Para entregar</div>${PRODUCCION_CLIENTES.map(c=>`
+      <div class="client-week-card">
+        <div class="client-week-top"><strong>${esc(c.cliente || 'Sin cliente')}</strong><span class="client-week-qty">${fmtCO.format(num(c.cantidad))} und</span></div>
+        <div class="client-week-meta">
+          ${c.id_pedido ? `<div>🧾 Pedido: ${esc(c.id_pedido)}</div>` : ''}
+          ${c.telefono ? `<div>📞 ${esc(c.telefono)}</div>` : ''}
+          ${c.direccion ? `<div>📍 ${esc(c.direccion)}</div>` : ''}
+        </div>
+      </div>
+    `).join('')}`
+    : '<div class="muted" style="margin-top:12px">Sin clientes asociados. Puedes registrar producción manual.</div>';
+
+  cont.innerHTML = `
+    <div class="production-summary">
+      <div class="kpi"><div class="kpi-label">Producto</div><div class="kpi-value">${esc(producto)}</div></div>
+      <div class="kpi"><div class="kpi-label">Cantidad</div><div class="kpi-value">${fmtCO.format(qty)}</div></div>
+      <div class="kpi"><div class="kpi-label">Receta</div><div class="kpi-value">${esc(receta.id)}</div></div>
+      <div class="kpi"><div class="kpi-label">Costo</div><div class="kpi-value">${moneyCO.format(costo)}</div></div>
+    </div>
+    <div class="deliver-title">Producción requerida</div>
+    ${pintarEtapasHtml(etapas)}
+    ${clientesHtml}
+  `;
+}
+
+function calcularEtapasCliente(receta, cantidad){
+  return (receta.etapas || []).map(etapa=>({
+    etapa_orden: etapa.etapa_orden,
+    etapa_nombre: etapa.etapa_nombre,
+    ingredientes: (etapa.ingredientes || []).map(ing=>({
+      id: ing.id,
+      nombre: ing.nombre,
+      unidad: ing.unidad,
+      cantidad_unitaria: num(ing.cantidad_unitaria),
+      cantidad_total: num(ing.cantidad_unitaria) * cantidad,
+      costo_total: num(ing.costo_receta) * cantidad,
+      descuentable: ing.descuentable === true
+    }))
+  }));
+}
+
+async function registrarProduccion(){
+  const id = document.getElementById('prod-receta').value;
+  const receta = RECETAS.find(r=>r.id===id);
+  const qty = Math.max(1,num(document.getElementById('prod-cantidad').value || 1));
+  const producto = document.getElementById('prod-producto').value || (receta ? receta.nombre : '');
+  const fechaProduccion = document.getElementById('prod-fecha-produccion').value;
+  const fechaEntrega = document.getElementById('prod-fecha-entrega').value;
+  const notas = document.getElementById('prod-notas').value || '';
+  const out = document.getElementById('prod-resultado');
+
+  if(!receta){
+    showAlert('Selecciona una receta válida.','warn');
+    return;
+  }
+
+  if(qty <= 0){
+    showAlert('La cantidad debe ser mayor a cero.','warn');
+    return;
+  }
+
+  out.innerHTML = '<div class="alert alert-info show">Registrando producción...</div>';
+
   try{
-    const res=await jsonp({accion:'getMovimientosInventario',limite:'150'});
-    if(!res.ok) throw new Error(res.error || 'No hay movimientos');
-    const rows=res.data || [];
-    if(!rows.length){tbody.innerHTML='<tr><td colspan="8">Sin movimientos registrados.</td></tr>';return;}
-    tbody.innerHTML=rows.map(m=>`<tr><td>${m.fecha||''}</td><td><span class="badge ${String(m.tipo).toLowerCase().includes('entrada')?'badge-ok':'badge-purple'}">${m.tipo||''}</span></td><td>${m.origen||''}</td><td><strong>${m.insumo||m.insumo_id||''}</strong><br><span class="mini">${m.insumo_id||''}</span></td><td class="num">${num(m.cantidad)}</td><td class="num">${num(m.stock_antes)}</td><td class="num">${num(m.stock_despues)}</td><td>${m.notas||''}</td></tr>`).join('');
+    const params = new URLSearchParams({
+      accion:'registrarProduccion',
+      receta_id:id,
+      producto:producto,
+      codigo_producto:PRODUCCION_CODIGO_PRODUCTO || '',
+      cantidad:String(qty),
+      fecha_produccion:fechaProduccion,
+      fecha_entrega:fechaEntrega,
+      notas:notas,
+      clientes_json:JSON.stringify(PRODUCCION_CLIENTES || [])
+    });
+
+    const r = await cargarJSONPConParams(params);
+    if(!r.ok) throw new Error(r.error || 'No se pudo registrar producción');
+
+    const movimientosHtml = (r.movimientos || []).length
+      ? `<div><strong>Stock descontado:</strong></div><ul>${(r.movimientos || []).map(m=>`<li>${esc(m.item)}: ${fmtCO.format(num(m.cantidad))} ${esc(m.unidad)} | ${fmtCO.format(num(m.stock_anterior))} → ${fmtCO.format(num(m.stock_nuevo))}</li>`).join('')}</ul>`
+      : '<div>No hubo movimientos de stock. Revisa BD_STOCK y la columna descontable.</div>';
+
+    const alertasHtml = (r.alertas || []).length
+      ? `<div class="prod-warning"><strong>Alertas:</strong><ul>${(r.alertas || []).map(a=>`<li>${esc(a)}</li>`).join('')}</ul></div>`
+      : '';
+
+    out.innerHTML = `
+      <div class="prod-result">
+        <strong>✅ Producción registrada</strong><br>
+        ID: ${esc(r.id_produccion)}<br>
+        Producto: ${esc(r.producto)}<br>
+        Cantidad: ${fmtCO.format(num(r.cantidad))}<br>
+        Costo estimado: ${moneyCO.format(num(r.costo_estimado))}<br><br>
+        ${movimientosHtml}
+      </div>
+      ${alertasHtml}
+    `;
+
+    showAlert('Producción registrada correctamente.','ok');
+    await cargarProducciones();
   }catch(err){
-    tbody.innerHTML = (HISTORIAL||[]).length ? HISTORIAL.slice(-50).reverse().map(h=>`<tr><td>${h.fecha||''}</td><td><span class="badge badge-purple">Producción</span></td><td>Historial</td><td>${h.nombre||h.id}</td><td class="num">${num(h.qty)}</td><td class="num">—</td><td class="num">—</td><td>Historial básico</td></tr>`).join('') : '<tr><td colspan="8">Activa BD_MOV_INVENTARIO con el parche de Apps Script.</td></tr>';
-    if(showAlert) alerta('info','ℹ️ Para movimientos completos pega el parche Apps Script. Mientras tanto se muestra historial básico de producción.');
+    out.innerHTML = `<div class="prod-warning">❌ ${esc(err.message)}</div>`;
+    showAlert('❌ ' + esc(err.message),'warn');
+  }
+}
+
+async function cargarProducciones(){
+  const cont = document.getElementById('producciones-list');
+  try{
+    const params = new URLSearchParams({accion:'getProducciones', limite:'15'});
+    const r = await cargarJSONPConParams(params);
+    if(!r.ok) throw new Error(r.error || 'No se pudieron cargar producciones');
+    const rows = r.producciones || [];
+    if(!rows.length){
+      cont.innerHTML = '<div class="muted">Todavía no hay producciones registradas.</div>';
+      return;
+    }
+
+    cont.innerHTML = `
+      <table class="table-list">
+        <thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Estado</th></tr></thead>
+        <tbody>
+          ${rows.map(x=>`
+            <tr>
+              <td><strong>${esc(x.fecha_produccion)}</strong><br><span class="muted">${esc(x.id_produccion)}</span></td>
+              <td>${esc(x.producto)}<br><span class="muted">${esc(x.receta_id)}</span></td>
+              <td>${fmtCO.format(num(x.cantidad))}</td>
+              <td><span class="badge badge-green">${esc(x.estado || 'Registrada')}</span></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }catch(err){
+    cont.innerHTML = `<div class="alert alert-warn show">❌ ${esc(err.message)}</div>`;
   }
 }
 </script>
